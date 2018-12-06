@@ -19,38 +19,36 @@
 
 <body>
   <div id="mathField">
-    <input type="text" size="30" autofocus spellcheck="false" id="input-0">
-     <span id="output-0" class="output"></span>
+    <!-- <input type="text" size="30" autofocus spellcheck="false" id="input-0"> -->
+     <!-- <span id="output-0" class="output"></span> -->
   </div>
   <!-- <button id="evalBtn">Evaluate</button> -->
   <script>
     let mathField = document.querySelector("#mathField");
     let inputNumber = 0;
+    //create initial input and output on page load
     document.addEventListener("DOMContentLoaded", function(event){
-        let newInput = createNewInput();
-        mathField.appendChild(newInput);
+        createNewField();
     })
+    //listen for keyboard events in the input box
     mathField.addEventListener("keyup", function(event) {
       let currentInput = event.target;
       let result = evalExpr(currentInput);
+      let inputId = currentInput.getAttribute("id");
+      let currentInputNumber = Number(inputId.substring(inputId.length-1));//retrieve the last character
       if (event.keyCode == 13) { //ENTER key is pressed
-        let newInput = createNewInput();
-        mathField.appendChild(newInput);
-        newInput.focus();
-        newInput.setSelectionRange(result.length, result.length);
-        let newOutput = document.createElement("span");
-        newOutput.setAttribute("id", "output-" + inputNumber);
-        mathField.appendChild(newOutput);
-        inputNumber++;
+        createNewField();
     } else if(event.keyCode == 38){//UP arrow key is pressed
-
+        if (inputNumber > 0){
+            let previousInput = mathField.querySelector("#input-" + (currentInputNumber - 1));
+            previousInput.focus();
+            moveCaretToEnd(previousInput);
+        }
     } else{//other keys are pressed
-        let inputId = currentInput.getAttribute("id");
-        let inputNumber = inputId.substring(inputId.length-1);//retrieve the last character
-        if (mathField.querySelector("span#output-" + inputNumber) !== null){
-            let output = mathField.querySelectorAll("span")[inputNumber];
+        if (mathField.querySelector("span#output-" + currentInputNumber) !== null){
+            let output = mathField.querySelectorAll("span")[currentInputNumber];
             console.log("result " + result);
-            output.innerHTML = "=" + result;
+            output.innerHTML = " = " + result;
         }
     }
     });
@@ -60,8 +58,23 @@
         newInput.setAttribute("size", "30");
         newInput.setAttribute("spellcheck", false);
         newInput.setAttribute("id", "input-" + inputNumber);
-        inputNumber++;
         return newInput;
+    }
+    let createNewOutput = function(){
+        let newOutput = document.createElement("span");
+        newOutput.setAttribute("id", "output-" + inputNumber);
+        return newOutput;
+    }
+    let createNewField = function(){
+        let newInput = createNewInput();
+        let newOutput = createNewOutput();
+        mathField.appendChild(newInput);
+        mathField.appendChild(newOutput);
+        newInput.focus();
+        inputNumber++;
+    }
+    let moveCaretToEnd = function(input){
+        input.setSelectionRange(input.value.length, input.value.length);
     }
     let evalExpr = function(input) {
       let expr = input.value;
