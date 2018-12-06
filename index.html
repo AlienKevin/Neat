@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+
+<head>
+  <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/symbola" type="text/css" />
+  <link rel="stylesheet" href="style.css">
+  <!-- Load nerdamer core-->
+  <!-- largest number is about 10^308, beyond is infinity-->
+  <!-- Smallest number is about -10^308, below is -infinity-->
+  <!-- Smallest fraction is about 10^-308, below is 0-->
+  <script src="/nerdamer/nerdamer.core.js"></script>
+  <!-- LOAD ADD-ONS -->
+  <script src="/nerdamer/Algebra.js"></script>
+  <script src="/nerdamer/Calculus.js"></script>
+  <script src="/nerdamer/Solve.js"></script>
+  <script src="/nerdamer/Extra.js"></script>
+  <!-- <script src="/js/script.js"></script> -->
+</head>
+
+<body>
+  <div id="mathField">
+    <input type="text" size="30" autofocus spellcheck="false" id="input-0">
+     <span id="output-0" class="output"></span>
+  </div>
+  <!-- <button id="evalBtn">Evaluate</button> -->
+  <script>
+    let mathField = document.querySelector("#mathField");
+    let inputNumber = 0;
+    document.addEventListener("DOMContentLoaded", function(event){
+        let newInput = createNewInput();
+        mathField.appendChild(newInput);
+    })
+    mathField.addEventListener("keyup", function(event) {
+      let currentInput = event.target;
+      let result = evalExpr(currentInput);
+      if (event.keyCode == 13) { //ENTER key is pressed
+        let newInput = createNewInput();
+        mathField.appendChild(newInput);
+        newInput.focus();
+        newInput.setSelectionRange(result.length, result.length);
+        let newOutput = document.createElement("span");
+        newOutput.setAttribute("id", "output-" + inputNumber);
+        mathField.appendChild(newOutput);
+        inputNumber++;
+    } else if(event.keyCode == 38){//UP arrow key is pressed
+
+    } else{//other keys are pressed
+        let inputId = currentInput.getAttribute("id");
+        let inputNumber = inputId.substring(inputId.length-1);//retrieve the last character
+        if (mathField.querySelector("span#output-" + inputNumber) !== null){
+            let output = mathField.querySelectorAll("span")[inputNumber];
+            console.log("result " + result);
+            output.innerHTML = "=" + result;
+        }
+    }
+    });
+    let createNewInput = function(){
+        let newInput = document.createElement("input");
+        newInput.setAttribute("type", "text");
+        newInput.setAttribute("size", "30");
+        newInput.setAttribute("spellcheck", false);
+        newInput.setAttribute("id", "input-" + inputNumber);
+        inputNumber++;
+        return newInput;
+    }
+    let evalExpr = function(input) {
+      let expr = input.value;
+      console.log("expr: " + expr);
+      let result = nerdamer(expr).evaluate() + "";
+      return result;
+    }
+  </script>
+</body>
+
+</html>
