@@ -15,16 +15,19 @@
   <script src="/nerdamer/Solve.js"></script>
   <script src="/nerdamer/Extra.js"></script>
   <!-- <script src="/js/script.js"></script> -->
+  <!-- load MathQuill -->
+  <link rel="stylesheet" href="mathquill/mathquill.css"/>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <script src="mathquill/mathquill.min.js"></script>
+  <title>PowCalc</title>
+  <meta charset="utf-8" lang="en">
 </head>
 
 <body>
-  <div id="mathField">
-    <!-- <input type="text" size="30" autofocus spellcheck="false" id="input-0"> -->
-     <!-- <span id="output-0" class="output"></span> -->
-  </div>
-  <!-- <button id="evalBtn">Evaluate</button> -->
+  <div id="mathField"></div>
   <script>
-    let mathField = document.querySelector("#mathField");
+    const MQ = MathQuill.getInterface(2);
+    const mathField = document.querySelector("#mathField");
     let inputNumber = 0;
     //create initial input and output on page load
     document.addEventListener("DOMContentLoaded", function(event){
@@ -36,20 +39,23 @@
         if (event.keyCode == 13 || event.keyCode == 38 || event.keyCode == 40){
             return;
         }
-        let currentInput = event.target;
-        let inputId = currentInput.getAttribute("id");
-        let currentInputNumber = Number(inputId.substring(inputId.length-1));//retrieve the last character
+        const currentInput = event.target;
+        const inputId = currentInput.getAttribute("id");
+        const currentInputNumber = Number(inputId.substring(inputId.length-1));//retrieve the last character
         if (mathField.querySelector("span#output-" + currentInputNumber) !== null){
-            let result = evalExpr(currentInput);
-            let output = mathField.querySelectorAll("span")[currentInputNumber];
+            const result = evalExpr(currentInput);
+            const output = mathField.querySelectorAll("span.output")[currentInputNumber];
             console.log("result " + result);
             output.innerHTML = " = " + result;
+            // console.log(output);
+            // console.log(output.getAttribute("id"));
+            MQ.StaticMath(output);
         }
     });
     mathField.addEventListener("keydown", function(event) {
-      let currentInput = event.target;
-      let inputId = currentInput.getAttribute("id");
-      let currentInputNumber = Number(inputId.substring(inputId.length-1));//retrieve the last character
+      const currentInput = event.target;
+      const inputId = currentInput.getAttribute("id");
+      const currentInputNumber = Number(inputId.substring(inputId.length-1));//retrieve the last character
       if (event.keyCode == 13) { //ENTER key is pressed
         createNewField();
     } else if(event.keyCode == 38){//UP arrow key is pressed
@@ -71,21 +77,23 @@
     }
     });
     let createNewInput = function(){
-        let newInput = document.createElement("input");
+        const newInput = document.createElement("input");
         newInput.setAttribute("type", "text");
         newInput.setAttribute("size", "30");
         newInput.setAttribute("spellcheck", false);
+        newInput.setAttribute("class", "input");
         newInput.setAttribute("id", "input-" + inputNumber);
         return newInput;
     }
     let createNewOutput = function(){
-        let newOutput = document.createElement("span");
+        const newOutput = document.createElement("span");
+        newOutput.setAttribute("class", "output");
         newOutput.setAttribute("id", "output-" + inputNumber);
         return newOutput;
     }
     let createNewField = function(){
-        let newInput = createNewInput();
-        let newOutput = createNewOutput();
+        const newInput = createNewInput();
+        const newOutput = createNewOutput();
         mathField.appendChild(newInput);
         mathField.appendChild(newOutput);
         newInput.focus();
@@ -95,9 +103,9 @@
         input.setSelectionRange(input.value.length, input.value.length);
     }
     let evalExpr = function(input) {
-      let expr = input.value;
+      const expr = input.value;
       console.log("expr: " + expr);
-      let result = nerdamer(expr).evaluate() + "";
+      const result = nerdamer.convertToLaTeX(nerdamer(expr).evaluate().toString()).toString();
       return result;
     }
   </script>
