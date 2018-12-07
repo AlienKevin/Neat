@@ -1,9 +1,15 @@
+body{
+    font-family: "SymbolaRegular", "Times New Roman", serif;
+}
+h1{
+    color: #bbb;
+}
 #mathField{
     font-size: 1.5em;
     padding: .2em;
 }
 input.input{
-    font-family: "SymbolaRegular", "Times New Roman", serif;
+    font-family: inherit;
     font-size: 1.3em;
     height: 1.3em;
 }
