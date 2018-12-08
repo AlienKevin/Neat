@@ -26,8 +26,8 @@ mathField.addEventListener("keyup", function(event) {
     if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
       console.log("result: " + result);
       console.log("converting to LaTeX");
-      console.log(result);
-      result = nerdamer.convertToLaTeX(result.text());
+      console.log(result.text());
+      result = result.toTeX();
       console.log("result: " + result);
     }
     result = convertToDecimals(result);
