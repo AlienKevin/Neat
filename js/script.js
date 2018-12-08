@@ -69,6 +69,30 @@ mathField.addEventListener("keydown", function(event) {
     } else {
       createNewField();
     }
+  } else if (event.keyCode == 8) { //BACKSPACE key is pressed
+    // input is empty and is NOT the first input box
+    if (currentInput.value === "" && currentInputNumber != 0) {
+      //remove current input box and associated output box
+      currentInput.remove();
+      const currentOutput = mathField.querySelector("#output-" + (currentInputNumber));
+      currentOutput.remove();
+      if (currentInputNumber + 1 < inputNumber){
+        const nextInput = mathField.querySelector("#input-" + (currentInputNumber + 1));
+        nextInput.focus();
+      } else{
+        const previousInput = mathField.querySelector("#input-" + (currentInputNumber-1));
+        previousInput.focus();
+      }
+      //reassign id for all subsequent input and output boxes
+      for (let i = currentInputNumber + 1; i < inputNumber; i++){
+        const input = mathField.querySelector("#input-" + i);
+        input.setAttribute("id", "input-" + (i-1));
+        const output = mathField.querySelector("#output-" + i);
+        output.setAttribute("id", "output-" + (i-1));
+      }
+      //decrement total input number
+      inputNumber --;
+    }
   }
 });
 //create a new input box
@@ -130,7 +154,7 @@ let removeImagineryResults = function(result) {
   if (result instanceof Array) { // result is an array of Symbols
     for (let i = 0; i < result.length; i++) {
       let elementDeleted = removeImagineryElements(result[i], result, i);
-      if (elementDeleted){
+      if (elementDeleted) {
         i--;
       }
     }
@@ -153,10 +177,10 @@ let removeImagineryElements = function(symbol, result, index) {
         i--;
       }
     }
-  } else{
-    if (symbol.value !== undefined && symbol.value.indexOf("i") >= 0){
-      if (result instanceof Array){// prevent deleting result containing function names like "sin"
-        result.splice(index,1);
+  } else {
+    if (symbol.value !== undefined && symbol.value.indexOf("i") >= 0) {
+      if (result instanceof Array) { // prevent deleting result containing function names like "sin"
+        result.splice(index, 1);
         return true;
       }
     }
@@ -217,7 +241,7 @@ let formatArrayResults = function(result) {
 }
 
 let convertToDecimals = function(result) {
-  if (result instanceof Array) {//an array result
+  if (result instanceof Array) { //an array result
     console.log("converting an array result to decimals");
     for (let i = 0; i < result.length; i++) {
       if (result[i] instanceof Array) {
@@ -229,9 +253,9 @@ let convertToDecimals = function(result) {
       }
     }
     return result;
-  } else if (typeof result === "object" && "text" in result) {//an expression result
+  } else if (typeof result === "object" && "text" in result) { //an expression result
     return result.text("decimals");
-  } else{ // a string result
+  } else { // a string result
     console.log("converting a string result to decimals");
     return result;
   }
