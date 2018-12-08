@@ -28,6 +28,12 @@ mathField.addEventListener("keyup", function(event) {
       console.log("converting to LaTeX");
       console.log(result.text());
       result = result.toTeX();
+      result = result.replace(/asin/g, "arcsin");
+      result = result.replace(/acos/g, "arccos");
+      result = result.replace(/atan/g, "arctan");
+      result = result.replace(/asec/g, "arcsec");
+      result = result.replace(/acsc/g, "arccsc");
+      result = result.replace(/acot/g, "arccot");
       console.log("result: " + result);
     }
     result = convertToDecimals(result);
