@@ -18,13 +18,16 @@ mathField.addEventListener("keyup", function(event) {
   const inputId = currentInput.getAttribute("id");
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
   if (mathField.querySelector("span#output-" + currentInputNumber) !== null) {
-    const result = evalExpr(currentInput);
+    let result = evalExpr(currentInput);
     const output = mathField.querySelectorAll("span.output")[currentInputNumber];
+    if (/[a-zA-Z]/.test(result)){
+      result = nerdamer.convertToLaTeX(result);
+    }
     output.innerHTML = " = " + result;
     // console.log(output);
     // console.log(output.getAttribute("id"));
     // beautify result display using MathQuill
-    // MQ.StaticMath(output);
+    MQ.StaticMath(output);
   }
 });
 //listen for keydown events of ENTER, UP arrow, and DOWN arrow keys to react immediately
