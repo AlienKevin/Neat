@@ -24,12 +24,16 @@ mathField.addEventListener("keyup", function(event) {
     let result = evalExpr(currentInput);
     const output = mathField.querySelectorAll("span.output")[currentInputNumber];
     if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
+      console.log("result: " + result);
       console.log("converting to LaTeX");
-      result = nerdamer.convertToLaTeX(result);
+      console.log(result);
+      result = nerdamer.convertToLaTeX(result.text());
+      console.log("result: " + result);
     }
     result = convertToDecimals(result);
+    console.log("result: " + result);
     output.innerHTML = " = " + result;
-    // console.log(output);
+    console.log(output.innerHTML);
     // console.log(output.getAttribute("id"));
     // beautify result display using MathQuill
     MQ.StaticMath(output);
@@ -145,8 +149,10 @@ let removeImagineryElements = function(symbol, result, index) {
     }
   } else{
     if (symbol.value !== undefined && symbol.value.indexOf("i") >= 0){
-      result.splice(index,1);
-      return true;
+      if (result instanceof Array){// prevent deleting result containing function names like "sin"
+        result.splice(index,1);
+        return true;
+      }
     }
   }
   return false;
@@ -220,6 +226,7 @@ let convertToDecimals = function(result) {
   } else if (typeof result === "object" && "text" in result) {//an expression result
     return result.text("decimals");
   } else{ // a string result
+    console.log("converting a string result to decimals");
     return result;
   }
 }
