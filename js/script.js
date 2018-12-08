@@ -96,8 +96,18 @@ let evalExpr = function(input) {
     //     result = nerdamer(expr).evaluate().toString();
     // }
   }
+  removeImagineryResults(result);
+  // convert fractions in result to decimals
+  result = result.text("decimal");
+  // separate long result outputs into multiple lines
+  if (result.length > 30) {
+    result = result.replace(/,/g, ",<br>");
+  }
+  console.log("result: " + result);
+  return result;
+}
+let removeImagineryResults = function(result){
   if (result.symbol !== undefined) {
-    console.log("result is an array");
     let symbol = result.symbol;
     console.log("symbol: " + symbol);
     let elements = symbol.elements;
@@ -115,12 +125,6 @@ let evalExpr = function(input) {
       }
     }
   }
-  result = result.text("decimal");
-  if (result.length > 30) {
-    result = result.replace(/,/g, ",<br>");
-  }
-  console.log("result: " + result);
-  return result;
 }
 //handle solveEquations command
 let handleSolveEquations = function(expr) {
