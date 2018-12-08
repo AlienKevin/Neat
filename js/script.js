@@ -13,16 +13,21 @@ document.addEventListener("DOMContentLoaded", function(event) {
 })
 //listen for keyboard events in the input box and update result display in output box
 mathField.addEventListener("keyup", function(event) {
-  //if key pressed is ENTER, UP Arrow, or DOWN Arrow, return immediately
-  if (event.keyCode == 13 || event.keyCode == 38 || event.keyCode == 40) {
+  //if key pressed is ENTER, UP Arrow, DOWN Arrow, return immediately
+  if (event.keyCode === 13 || event.keyCode === 38 || event.keyCode === 40) {
     return;
   }
   const currentInput = event.target;
   const inputId = currentInput.getAttribute("id");
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
+  const output = mathField.querySelectorAll("span.output")[currentInputNumber];
+  //if key pressed is BACKSPACE and current input box is empty, return immediately
+  if (event.keyCode === 8 && currentInput.value === ""){
+    output.innerHTML = "";
+    return;
+  }
   if (mathField.querySelector("span#output-" + currentInputNumber) !== null) {
     let result = evalExpr(currentInput);
-    const output = mathField.querySelectorAll("span.output")[currentInputNumber];
     if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
       console.log("result: " + result);
       console.log("converting to LaTeX");
@@ -51,16 +56,16 @@ mathField.addEventListener("keydown", function(event) {
   const currentInput = event.target;
   const inputId = currentInput.getAttribute("id");
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
-  if (event.keyCode == 13) { //ENTER key is pressed
+  if (event.keyCode === 13) { //ENTER key is pressed
     createNewField();
-  } else if (event.keyCode == 38) { //UP arrow key is pressed
+  } else if (event.keyCode === 38) { //UP arrow key is pressed
     event.preventDefault();
     if (inputNumber > 0) {
       let previousInput = mathField.querySelector("#input-" + (currentInputNumber - 1));
       previousInput.focus();
       moveCaretToEnd(previousInput);
     }
-  } else if (event.keyCode == 40) { //DOWN arrow key is pressed
+  } else if (event.keyCode === 40) { //DOWN arrow key is pressed
     event.preventDefault();
     if (currentInputNumber < inputNumber - 1) {
       let nextInput = mathField.querySelector("#input-" + (currentInputNumber + 1));
@@ -69,7 +74,7 @@ mathField.addEventListener("keydown", function(event) {
     } else {
       createNewField();
     }
-  } else if (event.keyCode == 8) { //BACKSPACE key is pressed
+  } else if (event.keyCode === 8) { //BACKSPACE key is pressed
     // input is empty and is NOT the first input box
     if (currentInput.value === "" && currentInputNumber != 0) {
       //remove current input box and associated output box
