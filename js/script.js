@@ -4,6 +4,9 @@ const MQ = MathQuill.getInterface(2);
 const mathField = document.querySelector("#mathField");
 // the enumerated number sequence of input, used to generate ids for input boxes
 let inputNumber = 0; // 0 means the first input (zero-based index)
+// convert to LaTeX or not
+let converToLaTexDefault = true;
+let convertToLaTeX = converToLaTexDefault;
 //create initial input and output on page load
 document.addEventListener("DOMContentLoaded", function(event) {
   createNewField();
@@ -20,14 +23,17 @@ mathField.addEventListener("keyup", function(event) {
   if (mathField.querySelector("span#output-" + currentInputNumber) !== null) {
     let result = evalExpr(currentInput);
     const output = mathField.querySelectorAll("span.output")[currentInputNumber];
-    if (/[a-zA-Z]/.test(result)){
+    if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
+      console.log("converting to LaTeX");
       result = nerdamer.convertToLaTeX(result);
     }
+    result = convertToDecimals(result);
     output.innerHTML = " = " + result;
     // console.log(output);
     // console.log(output.getAttribute("id"));
     // beautify result display using MathQuill
     MQ.StaticMath(output);
+    convertToLaTeX = converToLaTexDefault;
   }
 });
 //listen for keydown events of ENTER, UP arrow, and DOWN arrow keys to react immediately
@@ -100,8 +106,9 @@ let evalExpr = function(input) {
     // }
   }
   removeImagineryResults(result);
+  console.log("result after removing imagineries: " + result);
   // convert fractions in result to decimals
-  result = result.text("decimal");
+  // result = result.text("decimal");
   // separate long result outputs into multiple lines
   if (result.length > 30) {
     result = result.replace(/,/g, ",<br>");
@@ -109,25 +116,40 @@ let evalExpr = function(input) {
   console.log("result: " + result);
   return result;
 }
-let removeImagineryResults = function(result){
-  if (result.symbol !== undefined) {
-    let symbol = result.symbol;
-    console.log("symbol: " + symbol);
-    let elements = symbol.elements;
-    if (elements !== undefined) {
-      //remove imaginery results
-      console.log("elements: " + elements);
-      console.log("elements.length: " + elements.length);
-      for (let i = 0; i < elements.length; i++) {
-        console.log("element.value: " + elements[i].value);
-        if (elements[i] !== undefined && elements[i].value.indexOf("i") >= 0) {
-          console.log("imaginery element " + elements[i]);
-          elements.splice(i, 1);
-          i--;
-        }
+let removeImagineryResults = function(result) {
+  if (result instanceof Array) { // result is an array of Symbols
+    for (let i = 0; i < result.length; i++) {
+      let elementDeleted = removeImagineryElements(result[i], result, i);
+      if (elementDeleted){
+        i--;
       }
     }
+  } else if (result.symbol !== undefined) { // result is an Expression object with Symbol object embedded
+    removeImagineryElements(result.symbol, result);
   }
+}
+let removeImagineryElements = function(symbol, result, index) {
+  console.log("symbol: " + symbol);
+  let elements = symbol.elements;
+  if (elements !== undefined) {
+    //remove imaginery results
+    console.log("elements: " + elements);
+    console.log("elements.length: " + elements.length);
+    for (let i = 0; i < elements.length; i++) {
+      console.log("element.value: " + elements[i].value);
+      if (elements[i] !== undefined && elements[i].value.indexOf("i") >= 0) {
+        console.log("imaginery element " + elements[i]);
+        elements.splice(i, 1);
+        i--;
+      }
+    }
+  } else{
+    if (symbol.value !== undefined && symbol.value.indexOf("i") >= 0){
+      result.splice(index,1);
+      return true;
+    }
+  }
+  return false;
 }
 //handle solveEquations command
 let handleSolveEquations = function(expr) {
@@ -141,17 +163,67 @@ let handleSolveEquations = function(expr) {
     console.log("parenClose: " + parenClose);
     const params = expr.substring(parenOpen + 1, parenClose);
     console.log("params: " + params);
-    const paramList = params.split(",");
-    let result = nerdamer.solveEquations(paramList[0], paramList[1]);
-    for (let i = 0; i < result.length; i++) {
-      console.log("i=", i);
-      result[i] = nerdamer(result[i], undefined, "numer").text("decimals");
+    let paramList = [];
+    if (params.indexOf("[") >= 0) { // contains a list of equations
+      console.log("system of equations found!");
+      let bracketOpen = params.indexOf("[");
+      let bracketClose = params.indexOf("]");
+      let commaIndex = params.indexOf(",", bracketClose);
+      paramList[0] = params.substring(bracketOpen + 1, bracketClose).split(",");
+      console.log("paramList[0]: " + paramList[0] instanceof Array);
+    } else {
+      paramList = params.split(",");
     }
+    console.log("paramList[0]: " + paramList[0]);
+    console.log("paramList[1]: " + paramList[1]);
+    let result;
+    if (paramList[1] !== undefined) {
+      result = nerdamer.solveEquations(paramList[0], paramList[1]);
+      console.log("result: " + result);
+    } else {
+      result = nerdamer.solveEquations(paramList[0]);
+      result = formatArrayResults(result);
+    }
+    convertToLaTeX = false;
     return result;
   } else {
     return false;
   }
 }
+
+let formatArrayResults = function(result) {
+  let displayed = "{";
+  for (let i = 0; i < result.length; i++) {
+    displayed += result[i][0] + " = " + result[i][1];
+    if (i < result.length - 1) {
+      displayed += ",";
+    }
+  }
+  displayed += "}";
+  console.log("displayed: " + displayed);
+  return displayed;
+}
+
+let convertToDecimals = function(result) {
+  if (result instanceof Array) {//an array result
+    console.log("converting an array result to decimals");
+    for (let i = 0; i < result.length; i++) {
+      if (result[i] instanceof Array) {
+        for (let j = 0; j < result[i].length; j++) {
+          result[i][j] = nerdamer(result[i][j], undefined, "numer").text("decimals");
+        }
+      } else {
+        result[i] = nerdamer(result[i], undefined, "numer").text("decimals");
+      }
+    }
+    return result;
+  } else if (typeof result === "object" && "text" in result) {//an expression result
+    return result.text("decimals");
+  } else{ // a string result
+    return result;
+  }
+}
+
 //find matching parenthesis within a given string from the start index
 let findMatchingParen = function(string, start) {
   let stack = [];
