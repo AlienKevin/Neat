@@ -16,7 +16,7 @@
   <script src="nerdamer/Extra.js"></script>
   <!-- <script src="/js/script.js"></script> -->
   <!-- load MathQuill -->
-  <link rel="stylesheet" href="mathquill/mathquill.css"/>
+  <link rel="stylesheet" href="mathquill/mathquill.css" />
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
   <script src="mathquill/mathquill.min.js"></script>
   <!-- meta settings -->
@@ -25,7 +25,24 @@
 </head>
 
 <body>
-    <h1><a href="https://github.com/AlienKevin/PowCalc">PowCalc</a></h1>
+  <h1><a href="https://github.com/AlienKevin/PowCalc">PowCalc</a></h1>
+  <button id="createFormulaBtn"><p>Create Formulas</p></button>
+  <!-- The Modal -->
+  <div id="createFunctionWindow" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close">&times;</span>
+        <h2>Create Custom Functions</h2>
+      </div>
+      <div class="modal-body">
+        <p>Some text in the Modal Body</p>
+      </div>
+      <div class="modal-footer">
+        <button>Save Formula</button>
+      </div>
+    </div>
+  </div>
   <div id="mathField"></div>
   <!-- my js file -->
   <script src="js/script.js"></script>
