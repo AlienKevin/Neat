@@ -26,7 +26,9 @@
 
 <body>
   <h1><a href="https://github.com/AlienKevin/PowCalc">PowCalc</a></h1>
-  <button id="createFormulaBtn"><p>Create Formulas</p></button>
+  <button id="createFormulaBtn">Create Formulas</button>
+  <button id="createTableBtn">Create Table</button>
+  <div id="dataTable"></div>
   <!-- The Modal -->
   <div id="createFunctionWindow" class="modal">
     <!-- Modal content -->
@@ -36,7 +38,13 @@
         <h2>Create Custom Functions</h2>
       </div>
       <div class="modal-body">
-        <p>Some text in the Modal Body</p>
+        <p>Name of the formula:</p>
+        <input type="text" size="50">
+        <p>Usage of the formula:</p>
+        <input type="text" size="70">
+        <p>Formula:</p>
+        <input type="text" size="40">
+        <p>Define variables used:</p>
       </div>
       <div class="modal-footer">
         <button>Save Formula</button>
@@ -46,6 +54,7 @@
   <div id="mathField"></div>
   <!-- my js file -->
   <script src="js/script.js"></script>
+  <script src="js/dataTable.js"></script>
 </body>
 
 </html>

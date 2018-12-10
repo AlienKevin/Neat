@@ -1,8 +1,10 @@
 body{
-    font-family: "SymbolaRegular", "Times New Roman", serif;
+    font-family: Arial, sans-serif;
+    margin-left: 1.5em;
 }
 h1{
     color: #bbb;
+    font-family: "SymbolaRegular", "Times New Roman", serif;
 }
 a{
   color: inherit;
@@ -11,11 +13,33 @@ a{
 a:hover{
   color: #777;
 }
-#mathField{
-    font-size: 1.5em;
-    padding: .2em;
+button{
+  color: #333;
+  background: #eee;
+  /* border: 2px solid #000; */
+  border: none;
+  border-radius: 1em;
+  font-size: inherit;
+  padding: .5em;
+  transition-duration: .4s;
 }
-input.input{
+button:hover{
+  box-shadow: 0 5px 5px 0 rgba(0,0,0,0.24), 0 7px 20px 0 rgba(0,0,0,0.19)
+}
+button:focus{
+  outline: 0;
+}
+div#dataTable input.tableCell{
+  font-family: "SymbolaRegular", "Times New Roman", serif;
+  margin: 20px;
+  margin-left: 0;
+  margin-bottom: 20px;
+}
+#mathField{
+  font-family: "SymbolaRegular", "Times New Roman", serif;
+  font-size: 1.5em;
+}
+input{
     padding: .4em;
     font-family: inherit;
     font-size: 1.1em;
@@ -31,6 +55,11 @@ span.output{
     font-size: 1.2em;
     width: 150px;
     height: 50px;
+}
+
+button#createFormulaBtn{
+  margin-left: 0;
+  margin-bottom: .5em;
 }
 
 /* The Modal (background) */
@@ -79,7 +108,7 @@ span.output{
 .close {
     color: white;
     float: right;
-    font-size: 28px;
+    font-size: 40px;
     font-weight: bold;
 }
 
@@ -96,11 +125,22 @@ span.output{
     color: white;
 }
 
-.modal-body {padding: 2px 16px;}
+.modal-body {
+  padding: 2px 16px;
+  font-size: 1.2em;
+}
+
+.modal-body input{
+  font-size: inherit;
+  padding: .2em;
+  height: 1.4em;
+}
 
 .modal-footer {
-    padding: 2px 16px;
+    /* padding: 2px 16px;
     background-color: #5cb85c;
-    color: white;
+    color: white; */
+    margin-bottom: 50px;
+    margin-left: 20px;
 }
 /*********************** End of Create functions popup window***************************/
