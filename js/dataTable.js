@@ -12,12 +12,15 @@ dataTable.addEventListener("keydown", function(event){
     case 13: // ENTER key
       let cellId = event.target.getAttribute("id");
       let newRowNumber;
+      let focusCell;
+      let idPrefix = cellId.substring(0, cellId.indexOf("-") + 1); // "x-" or "y-"
       if (cellId.endsWith("header")){
         newRowNumber = 0;
       } else{
         newRowNumber = Number(cellId.charAt(cellId.length - 1)) + 1;
       }
-      createTableRow(newRowNumber);
+      let focusCellId =  idPrefix + newRowNumber;
+      createTableRow(focusCellId);
       break;
   }
 });
@@ -37,6 +40,11 @@ dataTable.addEventListener("keyup", function(event){
         } else{
           // set equation used
           equation = event.target.value;
+          // update all data values
+          console.log("reevaluating all data values");
+          for (let i = 0; i < rowNumber; i++){
+            evalTableRow(i);
+          }
         }
       } else{
         let currentRowNumber = cellId.charAt(cellId.length - 1);
@@ -49,7 +57,7 @@ let evalTableRow = function(currentRowNumber){
   let currentXValue = currentXCell.value;
   let currentYCell = dataTable.querySelector("#y-" + currentRowNumber);
   nerdamer.setVar(xVar, currentXValue);
-  let result = nerdamer(equation).text("decimals");
+  let result = nerdamer(equation).evaluate().text("decimals");
   currentYCell.setAttribute("value", result);
 }
 let createTableHeader = function(){
@@ -66,8 +74,9 @@ let createTableHeader = function(){
   dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
   dataTable.appendChild(document.createElement("br")); //create a line break
+  xCellHeader.focus();
 }
-let createTableRow = function(newRowNumber){
+let createTableRow = function(focusCellId){
   let xCell = document.createElement("input");
   xCell.setAttribute("class", "tableCell");
   xCell.setAttribute("size", 2);
@@ -80,4 +89,7 @@ let createTableRow = function(newRowNumber){
   dataTable.appendChild(yCell);
   dataTable.appendChild(document.createElement("br")); //create a line break
   rowNumber++;
+  console.log("focusCellId: " + focusCellId);
+  let focusCell = dataTable.querySelector("input#" + focusCellId);
+  focusCell.focus();
 }
