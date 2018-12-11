@@ -1,4 +1,4 @@
-# PowCalc
+# Neat
 A powerful and easy online calculator based on [Nerdamer](http://nerdamer.com/) and [MathQuill](http://mathquill.com/)
 Common features include:
 1. Addition (+), subtraction (-), multiplication (*), division (/) on all real numbers
@@ -12,4 +12,4 @@ Common features include:
 More operation support on the way...
 
 Screenshot demo:
-![PowCalc demo screenshot](https://raw.githubusercontent.com/AlienKevin/PowCalc/master/screenshots/demo1.PNG)
+![Neat demo screenshot](https://raw.githubusercontent.com/AlienKevin/Neat/master/screenshots/demo1.PNG)
