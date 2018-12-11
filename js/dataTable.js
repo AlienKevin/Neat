@@ -8,23 +8,52 @@ createTableBtn.addEventListener("click", function(event){
 })
 let dataTable = document.querySelector("div#dataTable");
 dataTable.addEventListener("keydown", function(event){
+  let cell = event.target;
   switch(event.keyCode){
     case 13: // ENTER key
       let cellId = event.target.getAttribute("id");
-      let newRowNumber;
-      let focusCell;
-      let idPrefix = cellId.substring(0, cellId.indexOf("-") + 1); // "x-" or "y-"
-      if (cellId.endsWith("header")){
-        newRowNumber = 0;
-      } else{
-        newRowNumber = Number(cellId.charAt(cellId.length - 1)) + 1;
-      }
-      let focusCellId =  idPrefix + newRowNumber;
+      let cellColumn = getColumn(cell);
+      let newRowNumber = getRowNumber(cell) + 1;
+      let focusCellId =  cellColumn + "-" + newRowNumber;
       createTableRow(focusCellId);
       break;
+    case 38: // UP arrow key
+      gotoPreviousRow(event.target);
+      break;
+    case 40: // DOWN arrow key
+      gotoNextRow(event.target);
+      break;
+
   }
 });
+let gotoPreviousRow = function(cell){
+  let currentRowNumber = getRowNumber(cell);
+  let currentColumn = getColumn(cell);
+  let previousCellId;
+  if (currentRowNumber > 0){ // after the first non-header row
+    previousCellId = currentColumn + "-" + (currentRowNumber - 1);
+  } else if (currentRowNumber === 0){ // at the first non-header row
+    previousCellId = currentColumn + "-" + "header";
+  } else if (currentRowNumber === -1){ // at header row
+    previousCellId = currentColumn + "-" + "header"; // stay at the same row
+  }
+  // console.log("previousCellId: " + previousCellId);
+  let previousCell = dataTable.querySelector("input#" + previousCellId);
+  previousCell.focus();
+}
+let gotoNextRow = function(cell){
+  let currentRowNumber = getRowNumber(cell);
+  let currentColumn = getColumn(cell);
+  let nextCellId = currentColumn + "-" + (currentRowNumber + 1);
+  let nextCell = dataTable.querySelector("input#" + nextCellId);
+  if (nextCell !== null){ // next cell exists
+    nextCell.focus();
+  } else{ // next cell doesn't exist
+    createTableRow(nextCellId);
+  }
+}
 dataTable.addEventListener("keyup", function(event){
+  let cell = event.target;
   switch(event.keyCode){
     case 13: // ENTER key
     case 38: // UP arrow key
@@ -47,11 +76,24 @@ dataTable.addEventListener("keyup", function(event){
           }
         }
       } else{
-        let currentRowNumber = cellId.charAt(cellId.length - 1);
+        let currentRowNumber = getRowNumber(cell);
         evalTableRow(currentRowNumber);
       }
   }
 });
+let getRowNumber = function(cell){
+  let cellId = cell.getAttribute("id");
+  let rowNumber = cellId.substring(cellId.indexOf("-") + 1, cellId.length);
+  if (rowNumber === "header"){
+    return -1; // header's row number is -1, because 0 is the first non-header row
+  } else{
+    return Number(rowNumber); // other non-header rows have zero-based indexes
+  }
+}
+let getColumn = function(cell){
+  let cellId = cell.getAttribute("id");
+  return cellId.substring(0, cellId.indexOf("-")); // return "x", or "y"
+}
 let evalTableRow = function(currentRowNumber){
   let currentXCell = dataTable.querySelector("#x-" + currentRowNumber);
   let currentXValue = currentXCell.value;
