@@ -98,9 +98,14 @@ let evalTableRow = function(currentRowNumber){
   let currentXCell = dataTable.querySelector("#x-" + currentRowNumber);
   let currentXValue = currentXCell.value;
   let currentYCell = dataTable.querySelector("#y-" + currentRowNumber);
-  nerdamer.setVar(xVar, currentXValue);
-  let result = nerdamer(equation).evaluate().text("decimals");
-  currentYCell.setAttribute("value", result);
+  if (currentXValue === ""){
+    currentYCell.value = "";
+  } else{
+    nerdamer.setVar(xVar, currentXValue);
+    let result = nerdamer(equation).evaluate().text("decimals");
+    console.log("result: " + result);
+    currentYCell.value = result;
+  }
 }
 let createTableHeader = function(){
   let xCellHeader = document.createElement("input");
@@ -108,11 +113,13 @@ let createTableHeader = function(){
   xCellHeader.setAttribute("id", "x-header");
   xCellHeader.setAttribute("size", 2);
   xCellHeader.setAttribute("value", "x");
+  xCellHeader.setAttribute("spellcheck", false);
   let yCellHeader = document.createElement("input");
   yCellHeader.setAttribute("class", "tableCell");
   yCellHeader.setAttribute("id", "y-header");
   yCellHeader.setAttribute("size", 10);
-  yCellHeader.setAttribute("value", "2*x");
+  yCellHeader.setAttribute("value", "2x");
+  yCellHeader.setAttribute("spellcheck", false);
   dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
   dataTable.appendChild(document.createElement("br")); //create a line break
@@ -123,10 +130,12 @@ let createTableRow = function(focusCellId){
   xCell.setAttribute("class", "tableCell");
   xCell.setAttribute("size", 2);
   xCell.setAttribute("id", "x-" + rowNumber);
+  xCell.setAttribute("spellcheck", false);
   let yCell = document.createElement("input");
   yCell.setAttribute("class", "tableCell");
   yCell.setAttribute("size", 2);
   yCell.setAttribute("id", "y-" + rowNumber);
+  yCell.setAttribute("spellcheck", false);
   dataTable.appendChild(xCell);
   dataTable.appendChild(yCell);
   dataTable.appendChild(document.createElement("br")); //create a line break
