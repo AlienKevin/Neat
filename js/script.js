@@ -59,7 +59,7 @@ mathField.addEventListener("keyup", function(event) {
       console.log("result: " + result);
       console.log("converting to LaTeX");
       console.log(result.text());
-      result = result.toTeX();
+      result = result.toTeX("decimal"); // export LaTeX as decimals
       result = result.replace(/asin/g, "arcsin");
       result = result.replace(/acos/g, "arccos");
       result = result.replace(/atan/g, "arctan");
