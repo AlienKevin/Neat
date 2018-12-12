@@ -23,19 +23,19 @@ const span = document.getElementsByClassName("close")[0];
 
 // When the user clicks the button, open the modal
 btn.onclick = function() {
-    modal.style.display = "block";
+  modal.style.display = "block";
 }
 
 // When the user clicks on <span> (x), close the modal
 span.onclick = function() {
-    modal.style.display = "none";
+  modal.style.display = "none";
 }
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
 }
 
 //listen for keyboard events in the input box and update result display in output box
@@ -49,7 +49,7 @@ mathField.addEventListener("keyup", function(event) {
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
   const output = mathField.querySelectorAll("span.output")[currentInputNumber];
   //if key pressed is BACKSPACE and current input box is empty, return immediately
-  if (event.keyCode === 8 && currentInput.value === ""){
+  if (event.keyCode === 8 && currentInput.value === "") {
     output.innerHTML = "";
     return;
   }
@@ -108,22 +108,22 @@ mathField.addEventListener("keydown", function(event) {
       currentInput.remove();
       const currentOutput = mathField.querySelector("#output-" + (currentInputNumber));
       currentOutput.remove();
-      if (currentInputNumber + 1 < inputNumber){
+      if (currentInputNumber + 1 < inputNumber) {
         const nextInput = mathField.querySelector("#input-" + (currentInputNumber + 1));
         nextInput.focus();
-      } else{
-        const previousInput = mathField.querySelector("#input-" + (currentInputNumber-1));
+      } else {
+        const previousInput = mathField.querySelector("#input-" + (currentInputNumber - 1));
         previousInput.focus();
       }
       //reassign id for all subsequent input and output boxes
-      for (let i = currentInputNumber + 1; i < inputNumber; i++){
+      for (let i = currentInputNumber + 1; i < inputNumber; i++) {
         const input = mathField.querySelector("#input-" + i);
-        input.setAttribute("id", "input-" + (i-1));
+        input.setAttribute("id", "input-" + (i - 1));
         const output = mathField.querySelector("#output-" + i);
-        output.setAttribute("id", "output-" + (i-1));
+        output.setAttribute("id", "output-" + (i - 1));
       }
       //decrement total input number
-      inputNumber --;
+      inputNumber--;
     }
   }
 });
@@ -159,6 +159,7 @@ let moveCaretToEnd = function(input) {
 }
 //evaluate expression inside an input box
 let evalExpr = function(input) {
+  let tempVars = deleteVars();
   const expr = input.value;
   console.log("expr: " + expr);
   let result;
@@ -180,7 +181,18 @@ let evalExpr = function(input) {
     result = result.replace(/,/g, ",<br>");
   }
   console.log("result: " + result);
+
   return result;
+}
+let deleteVars = function() {
+  let vars = nerdamer.getVars();
+  let tempVars = {};
+  for (let varName in vars) {
+    console.log("var: " + varName);
+    tempVars[varName] = vars[varName];
+  }
+  nerdamer.clearVars();
+  return tempVars;
 }
 let removeImagineryResults = function(result) {
   if (result instanceof Array) { // result is an array of Symbols
@@ -308,4 +320,39 @@ let findMatchingParen = function(string, start) {
     }
   }
   return -1;
+}
+
+// source: https://stackoverflow.com/questions/728360/how-do-i-correctly-clone-a-javascript-object
+function clone(obj) {
+  var copy;
+
+  // Handle the 3 simple types, and null or undefined
+  if (null == obj || "object" != typeof obj) return obj;
+
+  // Handle Date
+  if (obj instanceof Date) {
+    copy = new Date();
+    copy.setTime(obj.getTime());
+    return copy;
+  }
+
+  // Handle Array
+  if (obj instanceof Array) {
+    copy = [];
+    for (var i = 0, len = obj.length; i < len; i++) {
+      copy[i] = clone(obj[i]);
+    }
+    return copy;
+  }
+
+  // Handle Object
+  if (obj instanceof Object) {
+    copy = {};
+    for (var attr in obj) {
+      if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+    }
+    return copy;
+  }
+
+  throw new Error("Unable to copy obj! Its type isn't supported.");
 }
