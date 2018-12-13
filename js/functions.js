@@ -11,41 +11,42 @@ nerdamer.replaceFunction('sin', function(sin, core) {
 let radToDeg = function(rad) {
   // when rad begins to be >= 683565291, result is no longer precise
   let pi = Math.PI;
-  if (evenlyDivide(rad, 2 * pi)) {
-    return 0;
-  } else if (evenlyDivide(rad, pi)) {
-    return 180;
-  } else if (evenlyDivide(rad - pi / 2, 2 * pi)){
-    return 90;
-  } else if (evenlyDivide(rad + pi / 2, 2 * pi)){
-    return 270;
-  } else if (evenlyDivide(rad - pi / 4, 2 * pi)){
-    return 45;
-  } else if (evenlyDivide(rad + pi / 4, 2 * pi)){
-    return 315;
-  } else if (evenlyDivide(rad - pi / 6, 2 * pi)){
-    return 30;
-  } else if (evenlyDivide(rad + pi / 6, 2 * pi)){
-    return 330;
-  } else if (evenlyDivide(rad - pi / 3, 2 * pi)){
-    return 60;
-  } else if (evenlyDivide(rad + pi / 3, 2 * pi)){
-    return 300;
-  } else if (evenlyDivide(rad - 2 * pi / 3, 2 * pi)){
-    return 120;
-  } else if (evenlyDivide(rad + 2 * pi / 3, 2 * pi)){
-    return 240;
-  } else if (evenlyDivide(rad - 3 * pi / 4, 2 * pi)){
-    return 135;
-  } else if (evenlyDivide(rad + 3 * pi / 4, 2 * pi)){
-    return 225;
-  } else if (evenlyDivide(rad - 5 * pi / 6, 2 * pi)){
-    return 150;
-  } else if (evenlyDivide(rad + 5 * pi / 6, 2 * pi)){
-    return 210;
-  } else{
-    let smallRad = rad % (2 * pi);
-    return smallRad / (pi) * 180;
+  let smallRad = rad % (2 * pi);
+  switch (smallRad){
+    case 0:
+      return 0;
+    case pi / 6:
+      return 30;
+    case pi / 4:
+      return 45;
+    case pi / 3:
+      return 60;
+    case pi / 2:
+      return 90;
+    case 2 * pi / 3:
+      return 120;
+    case 3 * pi / 4:
+      return 135;
+    case 5 * pi / 6:
+      return 150;
+    case pi:
+      return 180;
+    case 7 * pi / 6:
+      return 210;
+    case 5 * pi / 4:
+      return 225;
+    case 4 * pi / 3:
+      return 240;
+    case 3 * pi / 2:
+      return 270;
+    case 5 * pi / 3:
+      return 300;
+    case 7 * pi / 4:
+      return 315;
+    case 11 * pi / 6:
+      return 330;
+    default:
+      return smallRad / (pi) * 180;
   }
 }
 let testRadToDeg = function(rad){
