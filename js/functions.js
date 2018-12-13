@@ -8,6 +8,22 @@ nerdamer.replaceFunction('sin', function(sin, core) {
     return sin(x);
   };
 });
+nerdamer.replaceFunction('cos', function(cos, core) {
+  return function(x) {
+    if (isDegrees) {
+      return cos(degSymbolToRadSymbol(x, core));
+    }
+    return cos(x);
+  };
+});
+nerdamer.replaceFunction('tan', function(tan, core) {
+  return function(x) {
+    if (isDegrees) {
+      return tan(degSymbolToRadSymbol(x, core));
+    }
+    return tan(x);
+  };
+});
 let radToDeg = function(rad) {
   let pi = Math.PI;
   let smallRad = rad % (2 * pi);
