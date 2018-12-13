@@ -4,6 +4,8 @@ const MQ = MathQuill.getInterface(2);
 const mathField = document.querySelector("#mathField");
 // the enumerated number sequence of input, used to generate ids for input boxes
 let inputNumber = 0; // 0 means the first input (zero-based index)
+// precision of the number of decimal places to retain
+const PRECISION = 5;
 // convert to LaTeX or not
 let converToLaTexDefault = true;
 let convertToLaTeX = converToLaTexDefault;
@@ -171,6 +173,9 @@ let evalExpr = function(input) {
     // let result = nerdamer(expr).evaluate().toTeX("decimal");
     try{
       result = nerdamer(expr, undefined, ["numer"]);
+      if (result.symbol != undefined && result.symbol.value === "#"){
+        return (+result.evaluate().text("decimals")).toFixed(PRECISION);
+      }
     } catch(e){
       result = "undefined"; // error like 1/0 (division by 0 not allowed)
     }
