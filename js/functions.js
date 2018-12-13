@@ -1,9 +1,9 @@
 // Add degrees/radians options for trig functions
-let isDegrees = false; // default to radians
+let isDegrees = true; // default to radians
 nerdamer.replaceFunction('sin', function(sin, core) {
   return function(x) {
     if (isDegrees) {
-
+      return sin(degSymbolToRadSymbol(x, core));
     }
     return sin(x);
   };
@@ -19,6 +19,20 @@ let radToDeg = function(rad) {
   } else{
     return deg;
   }
+}
+let radSymbolToDegSymbol = function(radSymbol, core){
+  let rad = radSymbol.valueOf();
+  let deg = radToDeg(rad);
+  return new core.Symbol(deg);
+}
+let degToRad = function(deg){
+  let pi = Math.PI;
+  return deg / 180 * pi;
+}
+let degSymbolToRadSymbol = function(degSymbol, core){
+  let deg = degSymbol.valueOf();
+  let rad = degToRad(deg);
+  return new core.Symbol(rad);
 }
 let testRadToDeg = function(rad){
   for (let i = 0; i < 1e9; i++){
