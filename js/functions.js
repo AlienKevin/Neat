@@ -1,29 +1,16 @@
 // Add degrees/radians options for trig functions
 let isDegrees = true; // default to radians
-nerdamer.replaceFunction('sin', function(sin, core) {
-  return function(x) {
-    if (isDegrees) {
-      return sin(degSymbolToRadSymbol(x, core));
-    }
-    return sin(x);
-  };
-});
-nerdamer.replaceFunction('cos', function(cos, core) {
-  return function(x) {
-    if (isDegrees) {
-      return cos(degSymbolToRadSymbol(x, core));
-    }
-    return cos(x);
-  };
-});
-nerdamer.replaceFunction('tan', function(tan, core) {
-  return function(x) {
-    if (isDegrees) {
-      return tan(degSymbolToRadSymbol(x, core));
-    }
-    return tan(x);
-  };
-});
+let trigs = ['sin', 'cos', 'tan', 'csc', 'sec', 'cot'];
+for (let trig of trigs){
+  nerdamer.replaceFunction(trig, function(f, core) {
+    return function(x) {
+      if (isDegrees) {
+        return f(degSymbolToRadSymbol(x, core));
+      }
+      return f(x);
+    };
+  });
+}
 let radToDeg = function(rad) {
   let pi = Math.PI;
   let smallRad = rad % (2 * pi);
