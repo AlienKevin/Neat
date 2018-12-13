@@ -1,5 +1,5 @@
 // Add degrees/radians options for trig functions
-let isDegrees = true; // default to radians
+let isDegrees = false; // default to radians
 let trigs = ['sin', 'cos', 'tan', 'csc', 'sec', 'cot'];
 for (let trig of trigs){
   nerdamer.replaceFunction(trig, function(f, core) {

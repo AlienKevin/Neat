@@ -58,8 +58,10 @@ mathField.addEventListener("keyup", function(event) {
     if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
       console.log("result: " + result);
       console.log("converting to LaTeX");
-      console.log(result.text());
-      result = result.toTeX("decimal"); // export LaTeX as decimals
+      // console.log(result.text());
+      if (result.toTeX !== undefined){ // result is a nerdamer expression
+        result = result.toTeX("decimal"); // export LaTeX as decimals
+      } // else then result is string values like "undefined"
       result = result.replace(/asin/g, "arcsin");
       result = result.replace(/acos/g, "arccos");
       result = result.replace(/atan/g, "arctan");
@@ -167,7 +169,11 @@ let evalExpr = function(input) {
     // let result = nerdamer.convertToLaTeX(nerdamer(expr).evaluate().text()).toString();
     // let result = nerdamer(expr).evaluate().text("decimal").toString();
     // let result = nerdamer(expr).evaluate().toTeX("decimal");
-    result = nerdamer(expr, undefined, ["numer"]);
+    try{
+      result = nerdamer(expr, undefined, ["numer"]);
+    } catch(e){
+      result = "undefined"; // error like 1/0 (division by 0 not allowed)
+    }
     // if (result == ""){
     //     result = nerdamer(expr).evaluate().toString();
     // }
@@ -222,10 +228,14 @@ let removeImagineryElements = function(symbol, result, index) {
       }
     }
   } else {
-    if (symbol.value !== undefined && symbol.value.indexOf("i") >= 0) {
-      if (result instanceof Array) { // prevent deleting result containing function names like "sin"
-        result.splice(index, 1);
-        return true;
+    if (symbol.value !== undefined){
+      if (symbol.value.indexOf === undefined){ // values like Infinity
+        // do nothing
+      } else if (symbol.value.indexOf("i") >= 0){
+        if (result instanceof Array) { // prevent deleting result containing function names like "sin"
+          result.splice(index, 1);
+          return true;
+        }
       }
     }
   }
