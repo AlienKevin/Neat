@@ -41,8 +41,8 @@
     <button id="settingBtn"><i class="material-icons" style="font-size: 30px; position: relative; top: 2px;">settings</i></button>
   </div>
   <div id="dataTable"></div>
-  <!-- The Modal -->
-  <div id="createFunctionWindow" class="modal">
+  <!-- The create formula window -->
+  <div id="createFormulaWindow" class="modal">
     <!-- Modal content -->
     <div class="modal-content">
       <div class="modal-header">
@@ -63,11 +63,29 @@
       </div>
     </div>
   </div>
+  <!-- The setting window -->
+  <div id="settingWindow" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close">&times;</span>
+        <h2>Setting</h2>
+      </div>
+      <div class="modal-body">
+        <p>Number of decimal places: </p>
+        <input type="text" size="10">
+      </div>
+      <div class="modal-footer">
+        <button>Save Settings</button>
+      </div>
+    </div>
+  </div>
   <div id="mathField"></div>
   <!-- my js file -->
   <script src="js/script.js"></script>
   <script src="js/functions.js"></script>
   <script src="js/dataTable.js"></script>
+  <script src="js/popups.js"></script>
 </body>
 
 </html>
