@@ -1,11 +1,22 @@
 // Add degrees/radians options for trig functions
-let isDegrees = false; // default to radians
+let isDegrees = true; // default to radians
 let trigs = ['sin', 'cos', 'tan', 'csc', 'sec', 'cot'];
+let inverseTrigs = ['asin', 'acos', 'atan', 'acsc', 'asec', 'acot'];
 for (let trig of trigs){
   nerdamer.replaceFunction(trig, function(f, core) {
     return function(x) {
       if (isDegrees) {
         return f(degSymbolToRadSymbol(x, core));
+      }
+      return f(x);
+    };
+  });
+}
+for (let trig of inverseTrigs){
+  nerdamer.replaceFunction(trig, function(f, core) {
+    return function(x) {
+      if (isDegrees) {
+        return radSymbolToDegSymbol(f(x), core);
       }
       return f(x);
     };
@@ -52,31 +63,3 @@ let testRadToDeg = function(rad){
   }
   console.log("radToDeg successfully passed the test!");
 }
-let evenlyDivide = function(val, step) {
-  let divided = val / step;
-  let errorBound = 1e-7;
-  if (Math.abs(divided - Math.round(divided)) < errorBound) {
-    return true;
-  }
-  return false;
-}
-// test functions for evenlyDivide
-let testEvenlyDivide = function() {
-  for (let i = 1; i < 300; i++) {
-    for (let j = 1; j < 10; j++) {
-      let num = j * Math.pow(10, i);
-      if (!evenlyDivide(num * Math.PI, Math.PI)) {
-        console.log("evenly divide breaks at: " + num);
-      }
-    }
-  }
-}
-// source: https://stackoverflow.com/questions/3966484/why-does-modulus-operator-return-fractional-number-in-javascript
-// function floatSafeRemainder(val, step){
-//     var valDecCount = (val.toString().split('.')[1] || '').length;
-//     var stepDecCount = (step.toString().split('.')[1] || '').length;
-//     var decCount = valDecCount > stepDecCount? valDecCount : stepDecCount;
-//     var valInt = parseInt(val.toFixed(decCount).replace('.',''));
-//     var stepInt = parseInt(step.toFixed(decCount).replace('.',''));
-//     return (valInt % stepInt) / Math.pow(10, decCount);
-//   }
