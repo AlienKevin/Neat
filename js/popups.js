@@ -18,15 +18,18 @@ for (let i = 0; i < popupIds.length; i++) {
 
   // When the user clicks on <span> (x), close the modal
   span.onclick = function() {
-    modal.style.display = "none";
+    closeWindow(modal);
   }
 
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function(event) {
     if (event.target == modal) {
-      modal.style.display = "none";
+      closeWindow(modal);
     }
   }
+}
+let closeWindow = function(modal){ // hide the popup window
+  modal.style.display = "none";
 }
 // setting window
 const settingWindow = document.querySelector("#settingWindow");
@@ -45,6 +48,7 @@ let setPrecision = function(value){
   if (value >= 0 && value <= MAX_PRECISION){
     precision = value;
     showPopupMessage("Settings saved!");
+    closeWindow(settingWindow);
   } else{
     showPopupMessage("precision value is out of range, should be from 0 to " + MAX_PRECISION);
   }
