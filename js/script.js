@@ -66,16 +66,23 @@ mathField.addEventListener("keyup", function(event) {
       console.log("error: ", result);
       output.innerHTML = '<div id="errorIcon" class="material-icons" style="font-size: 40px; position: relative; top: 10px">warning</div>'; // warning symbol
       let errorIcon = output.querySelector("div#errorIcon");
-      errorIcon.addEventListener("mousemove", function(event) {
-        if (isHovered(event.target)) {
-          if (output.querySelector("div.errorMsg") === null) {
-            let errorMsg = document.createElement("div");
-            errorMsg.setAttribute("class", "errorMsg");
-            errorMsg.innerHTML = result.message;
-            output.appendChild(errorMsg);
+      errorIcon.className += " not-selectable"; // set error icon to be not selectable
+      output.addEventListener("mousemove", function(event) {
+        let errorMsg = output.querySelector("div.errorMsg");
+        if (isHovered(errorIcon)) {
+          // console.log("errorMsg is hovered");
+          if (errorMsg === null) {
+            let newErrorMsg = document.createElement("div");
+            newErrorMsg.setAttribute("class", "errorMsg not-selectable");
+            newErrorMsg.innerHTML = result.message;
+            output.appendChild(newErrorMsg);
           }
+        } else{
+          // console.log("errorMsg is not hovered");
+          if (errorMsg !== null){
+            errorMsg.remove();
         }
-      });
+      }});
     } else {
       if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
         console.log("result: " + result);

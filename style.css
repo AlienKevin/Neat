@@ -36,11 +36,11 @@ button:focus {
   outline: 0;
 }
 
-.not-selectable{
+.not-selectable {
   user-select: none;
 }
 
-button#settingBtn{
+button#settingBtn {
   border-radius: 50%;
   line-height: 50px;
   width: 50px;
@@ -50,7 +50,25 @@ button#settingBtn{
   top: 5px;
 }
 
+.errorMsg {
+  /* source: https://www.desmos.com/calculator*/
+  background: #555;
+  color: #fff;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: .6em;
+  text-shadow: none;
+  line-height: 1.1em;
+  display: inline-block;
+  pointer-events: all;
+  text-align: center;
+  position: relative;
+  bottom: 5px;
+  left: 10px;
+}
+
 .toggle {
+  /* source: https://www.desmos.com/calculator*/
   display: inline-block;
   -webkit-box-flex: 1;
   -ms-box-flex: 1;
@@ -77,11 +95,12 @@ button#settingBtn{
   box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-.toggle:focus{
+.toggle:focus {
   outline: none;
 }
 
 .toggle-option {
+  /* source: https://www.desmos.com/calculator*/
   float: left;
   text-align: center;
   display: inline-block;
@@ -92,18 +111,25 @@ button#settingBtn{
 }
 
 .toggle .toggle-cover {
+  /* source: https://www.desmos.com/calculator*/
   -webkit-transform: translate(-100%, 0);
   transform: translate(-100%, 0);
 }
+
 /* in degrees */
-div.toggle-cover-right{
+
+div.toggle-cover-right {
   left: 100%;
 }
+
 /* in radians */
-div.toggle-cover-left{
+
+div.toggle-cover-left {
   left: 50%;
 }
+
 .toggle-cover {
+  /* source: https://www.desmos.com/calculator*/
   position: absolute;
   top: -1px;
   right: -1px;
