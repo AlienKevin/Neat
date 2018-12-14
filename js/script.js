@@ -62,34 +62,54 @@ mathField.addEventListener("keyup", function(event) {
   }
   if (mathField.querySelector("span#output-" + currentInputNumber) !== null) {
     let result = evalExpr(currentInput);
-    if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
+    if (result instanceof Error) { // an error object
+      console.log("error: ", result);
+      output.innerHTML = '<div id="errorIcon" class="material-icons" style="font-size: 40px; position: relative; top: 10px">warning</div>'; // warning symbol
+      let errorIcon = output.querySelector("div#errorIcon");
+      errorIcon.addEventListener("mousemove", function(event) {
+        if (isHovered(event.target)) {
+          if (output.querySelector("div.errorMsg") === null) {
+            let errorMsg = document.createElement("div");
+            errorMsg.setAttribute("class", "errorMsg");
+            errorMsg.innerHTML = result.message;
+            output.appendChild(errorMsg);
+          }
+        }
+      });
+    } else {
+      if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
+        console.log("result: " + result);
+        console.log("converting to LaTeX");
+        // console.log(result.text());
+        if (result.toTeX !== undefined) { // result is a nerdamer expression
+          result = result.toTeX("decimal"); // export LaTeX as decimals
+        } // else then result is string values like "undefined"
+        result = result.replace(/asin/g, "arcsin");
+        result = result.replace(/acos/g, "arccos");
+        result = result.replace(/atan/g, "arctan");
+        result = result.replace(/asec/g, "arcsec");
+        result = result.replace(/acsc/g, "arccsc");
+        result = result.replace(/acot/g, "arccot");
+        console.log("result: " + result);
+      }
+      result = convertToDecimals(result);
       console.log("result: " + result);
-      console.log("converting to LaTeX");
-      // console.log(result.text());
-      if (result.toTeX !== undefined) { // result is a nerdamer expression
-        result = result.toTeX("decimal"); // export LaTeX as decimals
-      } // else then result is string values like "undefined"
-      result = result.replace(/asin/g, "arcsin");
-      result = result.replace(/acos/g, "arccos");
-      result = result.replace(/atan/g, "arctan");
-      result = result.replace(/asec/g, "arcsec");
-      result = result.replace(/acsc/g, "arccsc");
-      result = result.replace(/acot/g, "arccot");
-      console.log("result: " + result);
-    }
-    result = convertToDecimals(result);
-    console.log("result: " + result);
-    output.innerHTML = " = " + result;
-    console.log(output.innerHTML);
-    // console.log(output.getAttribute("id"));
-    // beautify result display using MathQuill
-    if (displayInLaTeX){
-      MQ.StaticMath(output);
+      output.innerHTML = " = " + result;
+      console.log(output.innerHTML);
+      // console.log(output.getAttribute("id"));
+      // beautify result display using MathQuill
+      if (displayInLaTeX) {
+        MQ.StaticMath(output);
+      }
     }
     displayInLaTeX = displayInLaTeXDefault;
     convertToLaTeX = converToLaTexDefault;
   }
 });
+// check if an element is hovered
+let isHovered = function(element) {
+  return element.matches(":hover");
+}
 //listen for keydown events of ENTER, UP arrow, and DOWN arrow keys to react immediately
 mathField.addEventListener("keydown", function(event) {
   const currentInput = event.target;
@@ -226,6 +246,12 @@ let evalExpr = function(input) {
 
   return result;
 }
+// Error class for reporting calculation errors
+class Error {
+  constructor(message) {
+    this.message = message;
+  }
+}
 let deleteVars = function() {
   let vars = nerdamer.getVars();
   let tempVars = {};
@@ -310,8 +336,10 @@ let handleSolveEquations = function(expr) {
         result = nerdamer.solveEquations(paramList[0]);
         result = formatArrayResults(result);
       }
-    } catch(e){ // handle error like attempting to solve non-linear system of equations
-      result = e.toString();
+    } catch (e) { // handle error like attempting to solve non-linear system of equations
+      // console.log("error object: ", e);
+      // console.log("error object as string: " + e.toString());
+      result = new Error(e.message);
     }
     displayInLaTeX = false;
     convertToLaTeX = false;
