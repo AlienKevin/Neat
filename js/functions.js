@@ -1,7 +1,22 @@
 // Add degrees/radians options for trig functions
-let isDegrees = true; // default to radians
+let isDegrees = false; // default to radians
 let trigs = ['sin', 'cos', 'tan', 'csc', 'sec', 'cot'];
 let inverseTrigs = ['asin', 'acos', 'atan', 'acsc', 'asec', 'acot'];
+// register listener for degrees/radians toggle button
+let degRadToggle = document.querySelector("div#degRadToggle");
+degRadToggle.addEventListener("click", function(event){
+  switchToggle();
+});
+let switchToggle = function(){
+  let cover = degRadToggle.querySelector(".toggle-cover");
+  if (cover.getAttribute("class").indexOf("toggle-cover-right") >= 0){ // in radians, change to degrees
+    cover.setAttribute("class", "toggle-cover toggle-cover-left");
+  } else{ // in degrees, change to radians
+    cover.setAttribute("class", "toggle-cover toggle-cover-right");
+  }
+  isDegrees = !isDegrees; // flip the isDegrees setting
+}
+// trig functions
 for (let trig of trigs){
   nerdamer.replaceFunction(trig, function(f, core) {
     return function(x) {
@@ -12,6 +27,7 @@ for (let trig of trigs){
     };
   });
 }
+// inverse-trig functions
 for (let trig of inverseTrigs){
   nerdamer.replaceFunction(trig, function(f, core) {
     return function(x) {
