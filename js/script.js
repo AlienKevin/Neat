@@ -6,6 +6,8 @@ const mathField = document.querySelector("#mathField");
 let inputNumber = 0; // 0 means the first input (zero-based index)
 // precision of the number of decimal places to retain
 const PRECISION = 5;
+// the number of digits required to convert the result to exponent form
+const EXPONENT_MIN = 9;
 // convert to LaTeX or not
 let converToLaTexDefault = true;
 let convertToLaTeX = converToLaTexDefault;
@@ -173,8 +175,30 @@ let evalExpr = function(input) {
     // let result = nerdamer(expr).evaluate().toTeX("decimal");
     try{
       result = nerdamer(expr, undefined, ["numer"]);
-      if (result.symbol != undefined && result.symbol.value === "#"){
-        return (+result.evaluate().text("decimals")).toFixed(PRECISION);
+      if (result.symbol !== undefined && result.symbol.value === "#"){
+        console.log("result.symbol is valid");
+        const decimalResult = Number(result.evaluate().text("decimals"));
+        if (isFinite(decimalResult)){ // result is a valid number, not Infinity or NaN
+          console.log("result is a valid number");
+          const exponentialResult = decimalResult.toExponential(PRECISION);
+          const significantFigures = decimalResult.toExponential().indexOf("e");
+          const resultLength = decimalResult.toString().length;
+          const exponent = exponentialResult.substring(exponentialResult.indexOf("e") + 1);
+          if (exponent.charAt(0) === "-"){ // negative exponent, a small decimal number
+            const exponentMagnitude = exponent.substring(1); // number in the exponent without +/- sign
+            if (Number(exponentMagnitude) > PRECISION){
+              result = exponentialResult; // return the result in form of exponential
+            } else{
+              console.log("toFixed precision length: " + (PRECISION + (resultLength - significantFigures)));
+              result = decimalResult.toFixed(PRECISION + (resultLength - significantFigures));
+            }
+          } else{ // positive exponent
+            console.log("exponent of result is positive");
+            result = decimalResult.toFixed(PRECISION);
+          }
+          // remove trailing zero
+          result = parseFloat(result).toString();
+        }
       }
     } catch(e){
       result = "undefined"; // error like 1/0 (division by 0 not allowed)
