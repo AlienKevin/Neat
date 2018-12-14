@@ -12,7 +12,7 @@ for (let i = 0; i < popupIds.length; i++) {
   const span = modal.querySelector(".close");
 
   // When the user clicks the button, open the modal
-  btn.onclick = function() {
+  btn.onclick = function(event) {
     modal.style.display = "block";
   }
 
@@ -27,4 +27,28 @@ for (let i = 0; i < popupIds.length; i++) {
       modal.style.display = "none";
     }
   }
+}
+// setting window
+const settingWindow = document.querySelector("#settingWindow");
+const saveSettingBtn = settingWindow.querySelector("button#saveSettingBtn");
+saveSettingBtn.addEventListener("click", function(){
+  let inputs = settingWindow.querySelectorAll("div.modal-body input");
+  for (let input of inputs){
+    switch (input.name){
+      case "decimalPrecision":
+        setPrecision(Number(input.value));
+        break;
+    }
+  }
+});
+let setPrecision = function(value){
+  if (value >= 0 && value <= MAX_PRECISION){
+    precision = value;
+    showPopupMessage("Settings saved!");
+  } else{
+    showPopupMessage("precision value is out of range, should be from 0 to " + MAX_PRECISION);
+  }
+}
+let showPopupMessage = function(message){
+  window.alert(message);
 }

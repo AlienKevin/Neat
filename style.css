@@ -283,6 +283,12 @@ button#createFormulaBtn {
     color: white; */
   margin-bottom: 50px;
   margin-left: 20px;
+  margin-top: 50px;
 }
 
 /*********************** End of Create functions popup window***************************/
+
+/*********************** Setting Window*********************************/
+#settingWindow .modal-footer{
+  margin-top: 50px;
+}

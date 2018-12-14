@@ -5,7 +5,9 @@ const mathField = document.querySelector("#mathField");
 // the enumerated number sequence of input, used to generate ids for input boxes
 let inputNumber = 0; // 0 means the first input (zero-based index)
 // precision of the number of decimal places to retain
-const PRECISION = 5;
+let precision = 5;
+// maximum precision allowed
+const MAX_PRECISION = 12;
 // the number of digits required to convert the result to exponent form
 const EXPONENT_MIN = 9;
 // convert to LaTeX or not
@@ -188,21 +190,21 @@ let evalExpr = function(input) {
         const decimalResult = Number(result.evaluate().text("decimals"));
         if (isFinite(decimalResult)) { // result is a valid number, not Infinity or NaN
           console.log("result is a valid number");
-          const exponentialResult = decimalResult.toExponential(PRECISION);
+          const exponentialResult = decimalResult.toExponential(precision);
           const significantFigures = decimalResult.toExponential().indexOf("e");
           const resultLength = decimalResult.toString().length;
           const exponent = exponentialResult.substring(exponentialResult.indexOf("e") + 1);
           if (exponent.charAt(0) === "-") { // negative exponent, a small decimal number
             const exponentMagnitude = exponent.substring(1); // number in the exponent without +/- sign
-            if (Number(exponentMagnitude) > PRECISION) {
+            if (Number(exponentMagnitude) > precision) {
               result = exponentialResult; // return the result in form of exponential
             } else {
-              console.log("toFixed precision length: " + (PRECISION + (resultLength - significantFigures)));
-              result = decimalResult.toFixed(PRECISION + (resultLength - significantFigures));
+              console.log("toFixed precision length: " + (precision + (resultLength - significantFigures)));
+              result = decimalResult.toFixed(precision + (resultLength - significantFigures));
             }
           } else { // positive exponent
             console.log("exponent of result is positive");
-            result = decimalResult.toFixed(PRECISION);
+            result = decimalResult.toFixed(precision);
           }
           // remove trailing zero
           result = parseFloat(result).toString();
