@@ -9,8 +9,11 @@ const PRECISION = 5;
 // the number of digits required to convert the result to exponent form
 const EXPONENT_MIN = 9;
 // convert to LaTeX or not
-let converToLaTexDefault = true;
+const converToLaTexDefault = true;
 let convertToLaTeX = converToLaTexDefault;
+// display in LaTeX or not
+const displayInLaTeXDefault = true;
+let displayInLaTeX = displayInLaTeXDefault;
 //create initial input and output on page load
 document.addEventListener("DOMContentLoaded", function(event) {
   createNewField();
@@ -63,7 +66,7 @@ mathField.addEventListener("keyup", function(event) {
       console.log("result: " + result);
       console.log("converting to LaTeX");
       // console.log(result.text());
-      if (result.toTeX !== undefined){ // result is a nerdamer expression
+      if (result.toTeX !== undefined) { // result is a nerdamer expression
         result = result.toTeX("decimal"); // export LaTeX as decimals
       } // else then result is string values like "undefined"
       result = result.replace(/asin/g, "arcsin");
@@ -80,7 +83,10 @@ mathField.addEventListener("keyup", function(event) {
     console.log(output.innerHTML);
     // console.log(output.getAttribute("id"));
     // beautify result display using MathQuill
-    MQ.StaticMath(output);
+    if (displayInLaTeX){
+      MQ.StaticMath(output);
+    }
+    displayInLaTeX = displayInLaTeXDefault;
     convertToLaTeX = converToLaTexDefault;
   }
 });
@@ -173,26 +179,26 @@ let evalExpr = function(input) {
     // let result = nerdamer.convertToLaTeX(nerdamer(expr).evaluate().text()).toString();
     // let result = nerdamer(expr).evaluate().text("decimal").toString();
     // let result = nerdamer(expr).evaluate().toTeX("decimal");
-    try{
+    try {
       result = nerdamer(expr, undefined, ["numer"]);
-      if (result.symbol !== undefined && result.symbol.value === "#"){
+      if (result.symbol !== undefined && result.symbol.value === "#") {
         console.log("result.symbol is valid");
         const decimalResult = Number(result.evaluate().text("decimals"));
-        if (isFinite(decimalResult)){ // result is a valid number, not Infinity or NaN
+        if (isFinite(decimalResult)) { // result is a valid number, not Infinity or NaN
           console.log("result is a valid number");
           const exponentialResult = decimalResult.toExponential(PRECISION);
           const significantFigures = decimalResult.toExponential().indexOf("e");
           const resultLength = decimalResult.toString().length;
           const exponent = exponentialResult.substring(exponentialResult.indexOf("e") + 1);
-          if (exponent.charAt(0) === "-"){ // negative exponent, a small decimal number
+          if (exponent.charAt(0) === "-") { // negative exponent, a small decimal number
             const exponentMagnitude = exponent.substring(1); // number in the exponent without +/- sign
-            if (Number(exponentMagnitude) > PRECISION){
+            if (Number(exponentMagnitude) > PRECISION) {
               result = exponentialResult; // return the result in form of exponential
-            } else{
+            } else {
               console.log("toFixed precision length: " + (PRECISION + (resultLength - significantFigures)));
               result = decimalResult.toFixed(PRECISION + (resultLength - significantFigures));
             }
-          } else{ // positive exponent
+          } else { // positive exponent
             console.log("exponent of result is positive");
             result = decimalResult.toFixed(PRECISION);
           }
@@ -200,8 +206,9 @@ let evalExpr = function(input) {
           result = parseFloat(result).toString();
         }
       }
-    } catch(e){
+    } catch (e) {
       result = "undefined"; // error like 1/0 (division by 0 not allowed)
+      displayInLaTeX = false;
     }
     // if (result == ""){
     //     result = nerdamer(expr).evaluate().toString();
@@ -257,10 +264,10 @@ let removeImagineryElements = function(symbol, result, index) {
       }
     }
   } else {
-    if (symbol.value !== undefined){
-      if (symbol.value.indexOf === undefined){ // values like Infinity
+    if (symbol.value !== undefined) {
+      if (symbol.value.indexOf === undefined) { // values like Infinity
         // do nothing
-      } else if (symbol.value.indexOf("i") >= 0){
+      } else if (symbol.value.indexOf("i") >= 0) {
         if (result instanceof Array) { // prevent deleting result containing function names like "sin"
           result.splice(index, 1);
           return true;
@@ -272,37 +279,41 @@ let removeImagineryElements = function(symbol, result, index) {
 }
 //handle solveEquations command
 let handleSolveEquations = function(expr) {
-  const keywordIndex = expr.indexOf("solveEquations");
-  if (keywordIndex >= 0) {
+  const equalsIndex = expr.indexOf("=");
+  const doubleEqualsIndex = expr.indexOf("==");
+  if (equalsIndex >= 0 && doubleEqualsIndex === -1) { // only matching single equal sign
     console.log("solveEquations found!");
-    const paramStart = keywordIndex + "solveEquations".length;
-    const parenOpen = expr.indexOf("(", paramStart);
-    console.log("parenOpen: " + parenOpen);
-    const parenClose = findMatchingParen(expr, parenOpen);
-    console.log("parenClose: " + parenClose);
-    const params = expr.substring(parenOpen + 1, parenClose);
-    console.log("params: " + params);
     let paramList = [];
-    if (params.indexOf("[") >= 0) { // contains a list of equations
+    let openBraceIndex = expr.indexOf("{");
+    if (openBraceIndex >= 0) { // system of equations
       console.log("system of equations found!");
-      let bracketOpen = params.indexOf("[");
-      let bracketClose = params.indexOf("]");
-      let commaIndex = params.indexOf(",", bracketClose);
-      paramList[0] = params.substring(bracketOpen + 1, bracketClose).split(",");
+      let closeBraceIndex = expr.indexOf("}");
+      let params = expr.substring(openBraceIndex + 1, closeBraceIndex);
+      paramList[0] = params.split(",");
       console.log("paramList[0]: " + paramList[0] instanceof Array);
-    } else {
-      paramList = params.split(",");
+    } else { // single equation
+      let params = expr;
+      paramList = params.split(","); // split into expression and variable to solve for
+      if (paramList.length === 1) { // the variable to solve for is not defined
+        // pick the first variable parsed by nerdamer automatically
+        paramList[1] = nerdamer(params).variables()[0];
+      }
     }
     console.log("paramList[0]: " + paramList[0]);
     console.log("paramList[1]: " + paramList[1]);
     let result;
-    if (paramList[1] !== undefined) {
-      result = nerdamer.solveEquations(paramList[0], paramList[1]);
-      console.log("result: " + result);
-    } else {
-      result = nerdamer.solveEquations(paramList[0]);
-      result = formatArrayResults(result);
+    try {
+      if (paramList[1] !== undefined) {
+        result = nerdamer.solveEquations(paramList[0], paramList[1]);
+        console.log("result: " + result);
+      } else {
+        result = nerdamer.solveEquations(paramList[0]);
+        result = formatArrayResults(result);
+      }
+    } catch(e){ // handle error like attempting to solve non-linear system of equations
+      result = e.toString();
     }
+    displayInLaTeX = false;
     convertToLaTeX = false;
     return result;
   } else {
