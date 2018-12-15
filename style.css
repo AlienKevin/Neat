@@ -152,15 +152,23 @@ div#dataTable input.tableCell {
   font-size: 1.5em;
 }
 
-input {
+input{
   padding: .4em;
   font-family: inherit;
   font-size: 1.1em;
   height: 1.1em;
 }
 
-input.input:focus {
+span.input{
+  float: left;
+}
+
+span.input:focus {
   border: 3px solid lightblue;
+}
+
+span.mq-root-block{
+  width: 50vw !important;
 }
 
 span.output {
