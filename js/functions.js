@@ -6,6 +6,7 @@ let inverseTrigs = ['asin', 'acos', 'atan', 'acsc', 'asec', 'acot'];
 let degRadToggle = document.querySelector("div#degRadToggle");
 degRadToggle.addEventListener("click", function(event){
   switchToggle();
+  evaluateAll();
 });
 let switchToggle = function(){
   let cover = degRadToggle.querySelector(".toggle-cover");
