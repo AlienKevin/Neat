@@ -30,6 +30,9 @@ mathField.addEventListener("keyup", function(event) {
     return;
   }
   const currentInput = event.target.closest("span.input");
+  updateOutput(currentInput);
+});
+let updateOutput = function(currentInput){
   const inputId = currentInput.getAttribute("id");
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
   const output = mathField.querySelectorAll("span.output")[currentInputNumber];
@@ -91,7 +94,7 @@ mathField.addEventListener("keyup", function(event) {
     displayInLaTeX = displayInLaTeXDefault;
     convertToLaTeX = converToLaTexDefault;
   }
-});
+}
 // check if an element is hovered
 let isHovered = function(element) {
   return element.matches(":hover");
@@ -177,6 +180,14 @@ let createNewField = function() {
 //move caret to the end of input string
 let moveCaretToEnd = function(input) {
   input.setSelectionRange(input.value.length, input.value.length);
+}
+// evaluate all input boxes
+let evaluateAll = function(){
+  for (let i = 0; i < inputNumber; i++){
+    let inputId = "#input-" + i;
+    let input = mathField.querySelector(inputId);
+    updateOutput(input);
+  }
 }
 //evaluate expression inside an input box
 let evalExpr = function(input) {
