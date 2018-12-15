@@ -186,13 +186,26 @@ process.umask = function() { return 0; };
 
 },{}],2:[function(require,module,exports){
   // custom code for Neat starts here
-  
+
+
+
+
+
+
 const AlgebraLatex = require('algebra-latex');
 
 // Parse from LaTeX ...
-const latexInput = '\\frac{1}{3}';
-const algebraObj = new AlgebraLatex().parseLatex(latexInput);
-console.log(algebraObj.toMath());
+// const latexInput = '\\frac{2}{3}\\cdot \\log \\left(\\log \\left( \\frac{2}{3}\\right)\\right)\\cdot 0.238923';
+// const algebraObj = new AlgebraLatex().parseLatex(latexInput);
+// console.log(algebraObj.toMath());
+
+// a global function
+LaTeXToMath = function(LaTeXInput){
+  const algebraObj = new AlgebraLatex().parseLatex(LaTeXInput);
+  return algebraObj.toMath();
+}
+
+
 
   // custom code for Neat ends here
 },{"algebra-latex":6}],3:[function(require,module,exports){

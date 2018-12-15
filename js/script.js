@@ -4,6 +4,8 @@ const MQ = MathQuill.getInterface(2);
 const mathField = document.querySelector("#mathField");
 // the enumerated number sequence of input, used to generate ids for input boxes
 let inputNumber = 0; // 0 means the first input (zero-based index)
+// an array of MathQuill's MathField objects representing the input box
+let inputs = [];
 // precision of the number of decimal places to retain
 let precision = 5;
 // maximum precision allowed
@@ -27,7 +29,7 @@ mathField.addEventListener("keyup", function(event) {
   if (event.keyCode === 13 || event.keyCode === 38 || event.keyCode === 40) {
     return;
   }
-  const currentInput = event.target;
+  const currentInput = event.target.closest("span.input");
   const inputId = currentInput.getAttribute("id");
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
   const output = mathField.querySelectorAll("span.output")[currentInputNumber];
@@ -96,7 +98,9 @@ let isHovered = function(element) {
 }
 //listen for keydown events of ENTER, UP arrow, and DOWN arrow keys to react immediately
 mathField.addEventListener("keydown", function(event) {
-  const currentInput = event.target;
+  const currentInput = event.target.closest("span.input");
+  console.log("currentInput: ", currentInput);
+  console.log("currentInput.id: " + currentInput.getAttribute("id"));
   const inputId = currentInput.getAttribute("id");
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
   if (event.keyCode === 13) { //ENTER key is pressed
@@ -145,12 +149,13 @@ mathField.addEventListener("keydown", function(event) {
 });
 //create a new input box
 let createNewInput = function() {
-  const newInput = document.createElement("input");
+  const newInput = document.createElement("span");
   newInput.setAttribute("type", "text");
   newInput.setAttribute("size", "30");
   newInput.setAttribute("spellcheck", false);
   newInput.setAttribute("class", "input");
   newInput.setAttribute("id", "input-" + inputNumber);
+  inputs[inputNumber] = (MQ.MathField(newInput)); // add to the array of MathField objects
   return newInput;
 }
 //create a new output box
@@ -176,7 +181,8 @@ let moveCaretToEnd = function(input) {
 //evaluate expression inside an input box
 let evalExpr = function(input) {
   let tempVars = deleteVars();
-  const expr = input.value;
+  let inputField = inputs[getIdNumber(input)]; // get MathField object for the input
+  const expr = LaTeXToMath(inputField.latex());
   console.log("expr: " + expr);
   let result;
   if ((result = handleSolveEquations(expr)) === false) {
@@ -382,6 +388,12 @@ let findMatchingParen = function(string, start) {
     }
   }
   return -1;
+}
+
+// get input number from input boxes
+let getIdNumber = function(input){
+  let id = input.getAttribute("id");
+  return Number(id.substring(id.indexOf("-")));
 }
 
 // source: https://stackoverflow.com/questions/728360/how-do-i-correctly-clone-a-javascript-object
