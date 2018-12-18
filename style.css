@@ -160,6 +160,7 @@ input{
 }
 
 span.input{
+  padding: 0.5em;
   float: left;
 }
 

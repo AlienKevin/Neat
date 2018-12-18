@@ -201,8 +201,8 @@ const AlgebraLatex = require('algebra-latex');
 
 // a global function
 LaTeXToMath = function(LaTeXInput){
-  const algebraObj = new AlgebraLatex().parseLatex(LaTeXInput);
-  return algebraObj.toMath();
+    const algebraObj = (new AlgebraLatex()).parseLatex(LaTeXInput);
+    return algebraObj.toMath();
 }
 
 

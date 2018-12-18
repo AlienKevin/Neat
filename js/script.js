@@ -33,9 +33,10 @@ mathField.addEventListener("keyup", function(event) {
   updateOutput(currentInput);
 });
 let updateOutput = function(currentInput){
-  const inputId = currentInput.getAttribute("id");
-  const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
+  const currentInputNumber = getIdNumber(currentInput);
+  console.log("currentInputNumber: ", currentInputNumber);
   const output = mathField.querySelectorAll("span.output")[currentInputNumber];
+  console.log("output: ", output);
   //if key pressed is BACKSPACE and current input box is empty, return immediately
   if (event.keyCode === 8 && currentInput.value === "") {
     output.innerHTML = "";
@@ -159,6 +160,7 @@ let createNewInput = function() {
   newInput.setAttribute("class", "input");
   newInput.setAttribute("id", "input-" + inputNumber);
   inputs[inputNumber] = (MQ.MathField(newInput)); // add to the array of MathField objects
+  console.log("inputs: ", inputs);
   return newInput;
 }
 //create a new output box
@@ -189,6 +191,7 @@ let evaluateAll = function(){
     updateOutput(input);
   }
 }
+
 //evaluate expression inside an input box
 let evalExpr = function(input) {
   let tempVars = deleteVars();
@@ -404,7 +407,7 @@ let findMatchingParen = function(string, start) {
 // get input number from input boxes
 let getIdNumber = function(input){
   let id = input.getAttribute("id");
-  return Number(id.substring(id.indexOf("-")));
+  return Number(id.substring(id.indexOf("-") + 1));
 }
 
 // source: https://stackoverflow.com/questions/728360/how-do-i-correctly-clone-a-javascript-object
