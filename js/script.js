@@ -105,39 +105,40 @@ mathField.addEventListener("keydown", function(event) {
   const currentInput = event.target.closest("span.input");
   console.log("currentInput: ", currentInput);
   console.log("currentInput.id: " + currentInput.getAttribute("id"));
-  const inputId = currentInput.getAttribute("id");
-  const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
+  const currentInputNumber = getIdNumber(currentInput);
   if (event.keyCode === 13) { //ENTER key is pressed
     createNewField();
   } else if (event.keyCode === 38) { //UP arrow key is pressed
     event.preventDefault();
     if (inputNumber > 0) {
       let previousInput = mathField.querySelector("#input-" + (currentInputNumber - 1));
-      previousInput.focus();
+      setFocus(previousInput);
       moveCaretToEnd(previousInput);
     }
   } else if (event.keyCode === 40) { //DOWN arrow key is pressed
     event.preventDefault();
     if (currentInputNumber < inputNumber - 1) {
       let nextInput = mathField.querySelector("#input-" + (currentInputNumber + 1));
-      nextInput.focus();
+      setFocus(nextInput);
       moveCaretToEnd(nextInput);
     } else {
       createNewField();
     }
   } else if (event.keyCode === 8) { //BACKSPACE key is pressed
     // input is empty and is NOT the first input box
-    if (currentInput.value === "" && currentInputNumber != 0) {
+    const currentField = getMQField(currentInput); // get the corresponding MathQuill field
+    // console.log("currentField.latex: " + currentField.latex());
+    if (currentField.latex() === "" && currentInputNumber != 0) {
       //remove current input box and associated output box
       currentInput.remove();
       const currentOutput = mathField.querySelector("#output-" + (currentInputNumber));
       currentOutput.remove();
       if (currentInputNumber + 1 < inputNumber) {
         const nextInput = mathField.querySelector("#input-" + (currentInputNumber + 1));
-        nextInput.focus();
+        setFocus(nextInput);
       } else {
         const previousInput = mathField.querySelector("#input-" + (currentInputNumber - 1));
-        previousInput.focus();
+        setFocus(previousInput);
       }
       //reassign id for all subsequent input and output boxes
       for (let i = currentInputNumber + 1; i < inputNumber; i++) {
@@ -181,7 +182,15 @@ let createNewField = function() {
 }
 //move caret to the end of input string
 let moveCaretToEnd = function(input) {
-  input.setSelectionRange(input.value.length, input.value.length);
+  const field = getMQField(input);
+  field.moveToRightEnd(field);
+}
+let setFocus = function(input){
+  const field = getMQField(input);
+  field.focus();
+}
+let getMQField = function(input){
+  return inputs[getIdNumber(input)];
 }
 // evaluate all input boxes
 let evaluateAll = function(){
