@@ -6,6 +6,8 @@ const mathField = document.querySelector("#mathField");
 let inputNumber = 0; // 0 means the first input (zero-based index)
 // an array of MathQuill's MathField objects representing the input box
 let inputs = [];
+// the previous position of the caret in the current input
+let previousCaretPosition = 0; // default to 0 at the creation of an input box
 // precision of the number of decimal places to retain
 let precision = 5;
 // maximum precision allowed
@@ -21,7 +23,7 @@ let displayInLaTeX = displayInLaTeXDefault;
 //create initial input and output on page load
 document.addEventListener("DOMContentLoaded", function(event) {
   createNewField();
-})
+});
 
 //listen for keyboard events in the input box and update result display in output box
 mathField.addEventListener("keyup", function(event) {
@@ -110,17 +112,19 @@ mathField.addEventListener("keydown", function(event) {
     createNewField();
   } else if (event.keyCode === 38) { //UP arrow key is pressed
     event.preventDefault();
-    if (inputNumber > 0) {
+    if (inputNumber > 0 && !isCaretMoved(currentInput)) {
       let previousInput = mathField.querySelector("#input-" + (currentInputNumber - 1));
       setFocus(previousInput);
       moveCaretToEnd(previousInput);
     }
   } else if (event.keyCode === 40) { //DOWN arrow key is pressed
     event.preventDefault();
-    if (currentInputNumber < inputNumber - 1) {
+    if (currentInputNumber < inputNumber - 1 && !isCaretMoved(currentInput)) {
       let nextInput = mathField.querySelector("#input-" + (currentInputNumber + 1));
       setFocus(nextInput);
       moveCaretToEnd(nextInput);
+    } else if (isCaretMoved(currentInput)){
+      // do nothing, let the caret do its default behavior
     } else {
       createNewField();
     }
@@ -152,6 +156,7 @@ mathField.addEventListener("keydown", function(event) {
     }
   }
 });
+
 //create a new input box
 let createNewInput = function() {
   const newInput = document.createElement("span");
@@ -162,6 +167,7 @@ let createNewInput = function() {
   newInput.setAttribute("id", "input-" + inputNumber);
   inputs[inputNumber] = (MQ.MathField(newInput)); // add to the array of MathField objects
   console.log("inputs: ", inputs);
+
   return newInput;
 }
 //create a new output box
@@ -180,18 +186,37 @@ let createNewField = function() {
   setFocus(newInput);
   inputNumber++;
 }
-//move caret to the end of input string
+//move caret to the end of input string in the input box
 let moveCaretToEnd = function(input) {
   const field = getMQField(input);
   field.moveToRightEnd(field);
 }
+// set focus on the input box
 let setFocus = function(input){
   const field = getMQField(input);
   field.focus();
 }
+// get the corresponding MathQuill MathField to the input box
 let getMQField = function(input){
   return inputs[getIdNumber(input)];
 }
+// get the index of caret (a span) in MathField of the given input
+let getCaretPosition = function(input){
+  const rootBlock = input.querySelector("span.mq-root-block");
+  // count the index of the cursor block
+  let cursor = rootBlock.querySelector("span.mq-cursor");
+  let i = 0;
+  while( (cursor = cursor.previousSibling) != null ){
+    i++;
+  }
+  return i;
+}
+// check if the caret of the given input is moved from its previous position
+let isCaretMoved = function(input){
+  const currentCaretPosition = getCaretPosition(input);
+  return previousCaretPosition !== currentCaretPosition;
+}
+
 // evaluate all input boxes
 let evaluateAll = function(){
   for (let i = 0; i < inputNumber; i++){
