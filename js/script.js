@@ -177,7 +177,7 @@ let createNewField = function() {
   const newOutput = createNewOutput();
   mathField.appendChild(newInput);
   mathField.appendChild(newOutput);
-  newInput.focus();
+  setFocus(newInput);
   inputNumber++;
 }
 //move caret to the end of input string
