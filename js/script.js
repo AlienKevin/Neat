@@ -8,8 +8,6 @@ let inputNumber = 0; // 0 means the first input (zero-based index)
 let inputs = [];
 // the previous position of the caret in the current input
 let previousCaretPosition = 0; // default to 0 at the creation of an input box
-// whether to observe and update previousCaretPosition or not
-let observeCaretPosition = true;
 // precision of the number of decimal places to retain
 let precision = 5;
 // maximum precision allowed
@@ -36,7 +34,7 @@ mathField.addEventListener("keyup", function(event) {
   const currentInput = event.target.closest("span.input");
   updateOutput(currentInput);
 });
-let updateOutput = function(currentInput) {
+let updateOutput = function(currentInput){
   const currentInputNumber = getIdNumber(currentInput);
   console.log("currentInputNumber: ", currentInputNumber);
   const output = mathField.querySelectorAll("span.output")[currentInputNumber];
@@ -106,7 +104,6 @@ let isHovered = function(element) {
 }
 //listen for keydown events of ENTER, UP arrow, and DOWN arrow keys to react immediately
 mathField.addEventListener("keydown", function(event) {
-  observeCaretPosition = false;
   const currentInput = event.target.closest("span.input");
   console.log("currentInput: ", currentInput);
   console.log("currentInput.id: " + currentInput.getAttribute("id"));
@@ -126,7 +123,7 @@ mathField.addEventListener("keydown", function(event) {
       let nextInput = mathField.querySelector("#input-" + (currentInputNumber + 1));
       setFocus(nextInput);
       moveCaretToEnd(nextInput);
-    } else if (isCaretMoved(currentInput)) {
+    } else if (isCaretMoved(currentInput)){
       // do nothing, let the caret do its default behavior
     } else {
       createNewField();
@@ -195,38 +192,34 @@ let moveCaretToEnd = function(input) {
   field.moveToRightEnd(field);
 }
 // set focus on the input box
-let setFocus = function(input) {
+let setFocus = function(input){
   const field = getMQField(input);
   field.focus();
 }
 // get the corresponding MathQuill MathField to the input box
-let getMQField = function(input) {
+let getMQField = function(input){
   return inputs[getIdNumber(input)];
 }
 // get the index of caret (a span) in MathField of the given input
-let getCaretPosition = function(input) {
+let getCaretPosition = function(input){
   const rootBlock = input.querySelector("span.mq-root-block");
   // count the index of the cursor block
   let cursor = rootBlock.querySelector("span.mq-cursor");
   let i = 0;
-  while ((cursor = cursor.previousSibling) != null) {
+  while( (cursor = cursor.previousSibling) != null ){
     i++;
   }
   return i;
 }
 // check if the caret of the given input is moved from its previous position
-let isCaretMoved = function(input) {
+let isCaretMoved = function(input){
   const currentCaretPosition = getCaretPosition(input);
-  console.log("previousCaretPosition: " + previousCaretPosition);
-  console.log("currentCaretPosition: " + currentCaretPosition);
-  const result = previousCaretPosition !== currentCaretPosition;
-  // previousCaretPosition = currentCaretPosition;
-  return result;
+  return previousCaretPosition !== currentCaretPosition;
 }
 
 // evaluate all input boxes
-let evaluateAll = function() {
-  for (let i = 0; i < inputNumber; i++) {
+let evaluateAll = function(){
+  for (let i = 0; i < inputNumber; i++){
     let inputId = "#input-" + i;
     let input = mathField.querySelector(inputId);
     updateOutput(input);
@@ -446,27 +439,10 @@ let findMatchingParen = function(string, start) {
 }
 
 // get input number from input boxes
-let getIdNumber = function(input) {
+let getIdNumber = function(input){
   let id = input.getAttribute("id");
   return Number(id.substring(id.indexOf("-") + 1));
 }
-// observe the position of the caret in the currently focused input box and update
-// the value of previousCaretPosition variable
-let caretPositionObserver = new Worker("js/caretPositionObserver.js");
-caretPositionObserver.onmessage = function() {
-  if (observeCaretPosition) {
-    const focusedInput = mathField.querySelector("span.mq-focused");
-    // console.log("observing caret position");
-    // console.log("focusedInput: "+ focusedInput);
-    if (focusedInput !== null) {
-      previousCaretPosition = getCaretPosition(focusedInput);
-      // console.log("caretPosition: " + previousCaretPosition);
-    }
-    caretPositionObserver.postMessage([]);
-  }
-}
-// initiate the observer worker into a asynchronous infinite loop
-caretPositionObserver.postMessage([]);
 
 // source: https://stackoverflow.com/questions/728360/how-do-i-correctly-clone-a-javascript-object
 function clone(obj) {
