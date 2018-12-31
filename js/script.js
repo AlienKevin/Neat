@@ -1,5 +1,8 @@
 //initialize MathQuill
 const MQ = MathQuill.getInterface(2);
+MQ.config({
+   charsThatBreakOutOfSupSub: '+-=<>'
+});
 //retrieve mathField which contains all input and output boxes
 const mathField = document.querySelector("#mathField");
 // the enumerated number sequence of input, used to generate ids for input boxes
