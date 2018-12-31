@@ -170,6 +170,7 @@ span.input:focus {
 
 span.mq-root-block{
   width: 50vw !important;
+  overflow: auto !important;
 }
 
 span.output {
