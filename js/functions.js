@@ -1,3 +1,14 @@
+// nerdamer.replaceFunction("log", function(f, core) {
+//   return function(x) {
+//     return (new core.Expression(f(x))).multiply(new core.Expression(new core.Symbol(Math.LOG10E)));
+//     // let input = x.valueOf();
+//     // if (!isFinite(input)){ // not a number
+//     //
+//     // }
+//     // let result = Math.log10(input);
+//     // return new core.Symbol(result);
+//   };
+// });
 // Add degrees/radians options for trig functions
 let isDegrees = false; // default to radians
 let trigs = ['sin', 'cos', 'tan', 'csc', 'sec', 'cot'];
@@ -71,8 +82,9 @@ let degSymbolToRadSymbol = function(degSymbol, core){
   let rad = degToRad(deg);
   return new core.Symbol(rad);
 }
+// test if a symbol contains variable like "x" and "y"
 let containsVariable = function(symbol){
-  if (symbol.value === "#"){
+  if (symbol.value === "#"){ // a number
     return false;
   }
   return true;

@@ -1698,7 +1698,7 @@ var debug = exports.debug = function debug() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = ['sin', 'cos', 'tan', 'arcsin', 'arccos', 'arctan', 'log', 'ln', 'sqrt', 'max', 'min', 'abs', 'sign', 'round', 'diff', 'integrate'];
+exports.default = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'arcsin', 'arccos', 'arctan', 'log', 'ln', 'sqrt', 'max', 'min', 'abs', 'sign', 'round', 'diff', 'integrate'];
 },{}],12:[function(require,module,exports){
 'use strict';
 
