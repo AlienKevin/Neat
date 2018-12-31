@@ -53,6 +53,9 @@ let radToDeg = function(rad) {
 }
 let radSymbolToDegSymbol = function(radSymbol, core){
   let rad = radSymbol.valueOf();
+  if (containsVariable(radSymbol)){
+    return radSymbol;
+  }
   let deg = radToDeg(rad);
   return new core.Symbol(deg);
 }
@@ -62,8 +65,17 @@ let degToRad = function(deg){
 }
 let degSymbolToRadSymbol = function(degSymbol, core){
   let deg = degSymbol.valueOf();
+  if (containsVariable(degSymbol)){
+    return degSymbol;
+  }
   let rad = degToRad(deg);
   return new core.Symbol(rad);
+}
+let containsVariable = function(symbol){
+  if (symbol.value === "#"){
+    return false;
+  }
+  return true;
 }
 let testRadToDeg = function(rad){
   for (let i = 0; i < 1e9; i++){
