@@ -1,7 +1,10 @@
 //initialize MathQuill
 const MQ = MathQuill.getInterface(2);
 MQ.config({
-   charsThatBreakOutOfSupSub: '+-=<>'
+   charsThatBreakOutOfSupSub: '+-=<>',
+   autoCommands: 'pi theta sqrt sum',
+   spaceBehavesLikeTab: true,
+   leftRightIntoCmdGoes: 'up'
 });
 //retrieve mathField which contains all input and output boxes
 const mathField = document.querySelector("#mathField");
