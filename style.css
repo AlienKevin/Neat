@@ -161,7 +161,6 @@ input{
 
 span.input{
   padding: 0.5em;
-  float: left;
 }
 
 span.input:focus {
@@ -169,12 +168,12 @@ span.input:focus {
 }
 
 span.mq-root-block{
-  width: 50vw !important;
-  overflow: auto !important;
+  width: 45vw !important;
+  overflow-x: auto !important;
 }
 
 span.output {
-  padding: .2em;
+  padding: .5em;
 }
 
 #evalBtn {
