@@ -2,20 +2,20 @@ let createTableBtn = document.querySelector("button#createTableBtn");
 let rowNumber = 0;
 let xVar = "x"; // default independent variable set to "x"
 let equation = "2*x"; //default demo equation
-createTableBtn.addEventListener("click", function(event){
+createTableBtn.addEventListener("click", function(event) {
   console.log("initializing data table");
   createTableHeader();
 })
 let dataTable = document.querySelector("div#dataTable");
-dataTable.addEventListener("keydown", function(event){
+dataTable.addEventListener("keydown", function(event) {
   let cell = event.target;
   let cellColumn = getColumn(cell);
   let cellRow = getRowNumber(cell);
-  switch(event.keyCode){
+  switch (event.keyCode) {
     case 13: // ENTER key
-      if (cellRow === rowNumber){ // last row
+      if (cellRow === rowNumber) { // last row
         appendRow(cell);
-      } else{
+      } else {
         gotoNextRow(cell);
       }
       break;
@@ -27,42 +27,42 @@ dataTable.addEventListener("keydown", function(event){
       break;
     case 8: // BACKSPACE key
       let cellContent = getCellContent(cell);
-      if (cellColumn === "x" && cellContent === ""){
+      if (cellColumn === "x" && cellContent === "") {
         gotoPreviousRow(cell);
         removeTableRow(cell);
       }
       break;
   }
 });
-let gotoPreviousRow = function(cell){
+let gotoPreviousRow = function(cell) {
   let currentRowNumber = getRowNumber(cell);
   let currentColumn = getColumn(cell);
   let previousCellId;
-  if (currentRowNumber > 0){ // after the first non-header row
+  if (currentRowNumber > 0) { // after the first non-header row
     previousCellId = currentColumn + "-" + (currentRowNumber - 1);
-  } else if (currentRowNumber === 0){ // at the first non-header row
+  } else if (currentRowNumber === 0) { // at the first non-header row
     previousCellId = currentColumn + "-" + "header";
-  } else if (currentRowNumber === -1){ // at header row
+  } else if (currentRowNumber === -1) { // at header row
     previousCellId = currentColumn + "-" + "header"; // stay at the same row
   }
   // console.log("previousCellId: " + previousCellId);
   let previousCell = dataTable.querySelector("input#" + previousCellId);
   previousCell.focus();
 }
-let gotoNextRow = function(cell){
+let gotoNextRow = function(cell) {
   let currentRowNumber = getRowNumber(cell);
   let currentColumn = getColumn(cell);
   let nextCellId = currentColumn + "-" + (currentRowNumber + 1);
   let nextCell = dataTable.querySelector("input#" + nextCellId);
-  if (nextCell !== null){ // next cell exists
+  if (nextCell !== null) { // next cell exists
     nextCell.focus();
-  } else{ // next cell doesn't exist
+  } else { // next cell doesn't exist
     createTableRow(nextCellId);
   }
 }
-dataTable.addEventListener("keyup", function(event){
+dataTable.addEventListener("keyup", function(event) {
   let cell = event.target;
-  switch(event.keyCode){
+  switch (event.keyCode) {
     case 13: // ENTER key
     case 38: // UP arrow key
     case 40: // DOWN arrow key
@@ -70,69 +70,69 @@ dataTable.addEventListener("keyup", function(event){
       break;
     default: // all other keys
       let cellId = event.target.getAttribute("id");
-      if (cellId.endsWith("header")){ // table header
-        if (cellId.startsWith("x")){
+      if (cellId.endsWith("header")) { // table header
+        if (cellId.startsWith("x")) {
           // set independent var
           xVar = event.target.value;
-        } else{
+        } else {
           // set equation used
           equation = event.target.value;
           // update all data values
           console.log("reevaluating all data values");
-          for (let i = 0; i < rowNumber; i++){
+          for (let i = 0; i < rowNumber; i++) {
             evalTableRow(i);
           }
         }
-      } else{
+      } else {
         let currentRowNumber = getRowNumber(cell);
         evalTableRow(currentRowNumber);
       }
   }
 });
-let getRowNumber = function(cell){
+let getRowNumber = function(cell) {
   let cellId = cell.getAttribute("id");
   let rowNumber = cellId.substring(cellId.indexOf("-") + 1, cellId.length);
-  if (rowNumber === "header"){
+  if (rowNumber === "header") {
     return -1; // header's row number is -1, because 0 is the first non-header row
-  } else{
+  } else {
     return Number(rowNumber); // other non-header rows have zero-based indexes
   }
 }
-let getColumn = function(cell){
+let getColumn = function(cell) {
   let cellId = cell.getAttribute("id");
   return cellId.substring(0, cellId.indexOf("-")); // return "x", or "y"
 }
-let getCellId = function(cell){
+let getCellId = function(cell) {
   return cell.getAttribute("id");
 }
-let getCellContent = function(cell){
+let getCellContent = function(cell) {
   let cellId = getCellId(cell);
   return dataTable.querySelector("input#" + cellId).value;
 }
-let getXCell = function(cellRow){
+let getXCell = function(cellRow) {
   let xCellId = "x-" + cellRow;
   let xCell = dataTable.querySelector("input#" + xCellId);
   return xCell;
 }
-let getYCell = function(cellRow){
+let getYCell = function(cellRow) {
   let yCellId = "y-" + cellRow;
   let yCell = dataTable.querySelector("input#" + yCellId);
   return yCell;
 }
-let evalTableRow = function(currentRowNumber){
+let evalTableRow = function(currentRowNumber) {
   let currentXCell = dataTable.querySelector("#x-" + currentRowNumber);
   let currentXValue = currentXCell.value;
   let currentYCell = dataTable.querySelector("#y-" + currentRowNumber);
-  if (currentXValue === ""){
+  if (currentXValue === "") {
     currentYCell.value = "";
-  } else{
+  } else {
     nerdamer.setVar(xVar, currentXValue);
     let result = nerdamer(equation).evaluate().text("decimals");
     console.log("result: " + result);
     currentYCell.value = result;
   }
 }
-let createTableHeader = function(){
+let createTableHeader = function() {
   let xCellHeader = document.createElement("input");
   xCellHeader.setAttribute("class", "tableCell");
   xCellHeader.setAttribute("id", "x-header");
@@ -147,6 +147,14 @@ let createTableHeader = function(){
   yCellHeader.setAttribute("spellcheck", false);
   dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
+  // create a close button to delete the whole table
+  let closeBtn = document.createElement("span");
+  closeBtn.setAttribute("class", "close");
+  closeBtn.innerHTML = "x";
+  closeBtn.addEventListener("click", function() {
+    clearElement(dataTable);
+  });
+  dataTable.appendChild(closeBtn);
   dataTable.appendChild(document.createElement("br")); //create a line break
   createTableRow("x-0"); // create and focus on a new data row
   // create placeholder for hinting
@@ -158,7 +166,7 @@ let createTableHeader = function(){
   let hintResult = nerdamer(equation).evaluate().text("decimals");
   hintYCell.setAttribute("placeholder", hintResult);
 }
-let createTableRow = function(focusCellId){
+let createTableRow = function(focusCellId) {
   let xCell = document.createElement("input");
   xCell.setAttribute("class", "tableCell");
   xCell.setAttribute("size", 2);
@@ -178,15 +186,15 @@ let createTableRow = function(focusCellId){
   let focusCell = dataTable.querySelector("input#" + focusCellId);
   focusCell.focus();
 }
-let appendRow = function(cell){
-  let focusCellId =  cellColumn + "-" + (rowNumber + 1);
+let appendRow = function(cell) {
+  let focusCellId = cellColumn + "-" + (rowNumber + 1);
   createTableRow(focusCellId);
 }
-let removeTableRow = function(cell){
+let removeTableRow = function(cell) {
   let cellRow = getRowNumber(cell);
-  if (cellRow === -1){ // header row
+  if (cellRow === -1) { // header row
     //can't remove header row
-  } else{
+  } else {
     // remove the whole row
     let xCell = getXCell(cellRow);
     let yCell = getYCell(cellRow);
@@ -196,18 +204,25 @@ let removeTableRow = function(cell){
     yCell.remove();
     decrementRowNumbers(cellRow + 1);
     rowNumber--;
-    if (linebreak.tagName.toUpperCase() === "BR"){ // check if the element is a linebreak
+    if (linebreak.tagName.toUpperCase() === "BR") { // check if the element is a linebreak
       linebreak.remove();
     }
   }
 }
-let decrementRowNumbers = function(cellRow){
+let decrementRowNumbers = function(cellRow) {
   console.log("cellRow: " + cellRow);
-  for (let i = cellRow; i < rowNumber; i++){
+  for (let i = cellRow; i < rowNumber; i++) {
     let xCell = getXCell(i);
     let yCell = getYCell(i);
     let newRowNumber = i - 1;
     xCell.setAttribute("id", "x-" + newRowNumber);
     yCell.setAttribute("id", "y-" + newRowNumber);
+  }
+}
+// clear all childrens of a given element
+// by Gabriel McAdams on StackOverflow
+let clearElement = function(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
   }
 }
