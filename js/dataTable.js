@@ -14,7 +14,7 @@ dataTable.addEventListener("keydown", function(event){
   switch(event.keyCode){
     case 13: // ENTER key
       if (cellRow === rowNumber){ // last row
-        createNextRow(cell);
+        appendRow(cell);
       } else{
         gotoNextRow(cell);
       }
@@ -178,9 +178,8 @@ let createTableRow = function(focusCellId){
   let focusCell = dataTable.querySelector("input#" + focusCellId);
   focusCell.focus();
 }
-let createNextRow = function(cell){
-  let newRowNumber = getRowNumber(cell) + 1;
-  let focusCellId =  cellColumn + "-" + newRowNumber;
+let appendRow = function(cell){
+  let focusCellId =  cellColumn + "-" + (rowNumber + 1);
   createTableRow(focusCellId);
 }
 let removeTableRow = function(cell){
