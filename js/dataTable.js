@@ -10,11 +10,14 @@ let dataTable = document.querySelector("div#dataTable");
 dataTable.addEventListener("keydown", function(event){
   let cell = event.target;
   let cellColumn = getColumn(cell);
+  let cellRow = getRowNumber(cell);
   switch(event.keyCode){
     case 13: // ENTER key
-      let newRowNumber = getRowNumber(cell) + 1;
-      let focusCellId =  cellColumn + "-" + newRowNumber;
-      createTableRow(focusCellId);
+      if (cellRow === rowNumber){ // last row
+        createNextRow(cell);
+      } else{
+        gotoNextRow(cell);
+      }
       break;
     case 38: // UP arrow key
       gotoPreviousRow(cell);
@@ -174,6 +177,11 @@ let createTableRow = function(focusCellId){
   console.log("focusCellId: " + focusCellId);
   let focusCell = dataTable.querySelector("input#" + focusCellId);
   focusCell.focus();
+}
+let createNextRow = function(cell){
+  let newRowNumber = getRowNumber(cell) + 1;
+  let focusCellId =  cellColumn + "-" + newRowNumber;
+  createTableRow(focusCellId);
 }
 let removeTableRow = function(cell){
   let cellRow = getRowNumber(cell);
