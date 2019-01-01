@@ -147,6 +147,24 @@ div#dataTable input.tableCell {
   margin-bottom: 20px;
 }
 
+div#dataTable span.close{ /* close button */
+  float: none;
+  color: gray;
+  background: #eee;
+  border: none;
+  padding-left: .4em;
+  padding-right: .4em;
+  padding-bottom: .2em;
+  border-radius: 50%;
+  width: .1em;
+  line-height: .1em;
+}
+
+div#dataTable span.close:hover{
+  color: black;
+}
+
+
 #mathField {
   font-family: "SymbolaRegular", "Times New Roman", serif;
   font-size: 1.5em;
