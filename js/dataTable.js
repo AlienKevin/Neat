@@ -11,21 +11,32 @@ dataTable.addEventListener("keydown", function(event){
   let cell = event.target;
   switch(event.keyCode){
     case 13: // ENTER key
-      let cellId = event.target.getAttribute("id");
       let cellColumn = getColumn(cell);
       let newRowNumber = getRowNumber(cell) + 1;
       let focusCellId =  cellColumn + "-" + newRowNumber;
       createTableRow(focusCellId);
       break;
     case 38: // UP arrow key
-      gotoPreviousRow(event.target);
+      gotoPreviousRow(cell);
       break;
     case 40: // DOWN arrow key
-      gotoNextRow(event.target);
+      gotoNextRow(cell);
       break;
-
+    case 8: // BACKSPACE key
+      let cellContent = getCellContent(cell);
+      if (cellContent === ""){
+        gotoPreviousRow(cell);
+      }
+      break;
   }
 });
+let getCellId = function(cell){
+  return cell.getAttribute("id");
+}
+let getCellContent = function(cell){
+  let cellId = getCellId(cell);
+  return dataTable.querySelector("input#" + cellId).value;
+}
 let gotoPreviousRow = function(cell){
   let currentRowNumber = getRowNumber(cell);
   let currentColumn = getColumn(cell);
@@ -136,6 +147,7 @@ let createTableRow = function(focusCellId){
   yCell.setAttribute("size", 2);
   yCell.setAttribute("id", "y-" + rowNumber);
   yCell.setAttribute("spellcheck", false);
+  yCell.readOnly = true;
   dataTable.appendChild(xCell);
   dataTable.appendChild(yCell);
   dataTable.appendChild(document.createElement("br")); //create a line break
