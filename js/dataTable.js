@@ -145,7 +145,15 @@ let createTableHeader = function(){
   dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
   dataTable.appendChild(document.createElement("br")); //create a line break
-  xCellHeader.focus();
+  createTableRow("x-0"); // create and focus on a new data row
+  // create placeholder for hinting
+  let hintXValue = 1.5;
+  let hintXCell = getXCell(0);
+  hintXCell.setAttribute("placeholder", hintXValue);
+  let hintYCell = getYCell(0);
+  nerdamer.setVar(xVar, hintXValue);
+  let hintResult = nerdamer(equation).evaluate().text("decimals");
+  hintYCell.setAttribute("placeholder", hintResult);
 }
 let createTableRow = function(focusCellId){
   let xCell = document.createElement("input");
