@@ -9,9 +9,9 @@ createTableBtn.addEventListener("click", function(event){
 let dataTable = document.querySelector("div#dataTable");
 dataTable.addEventListener("keydown", function(event){
   let cell = event.target;
+  let cellColumn = getColumn(cell);
   switch(event.keyCode){
     case 13: // ENTER key
-      let cellColumn = getColumn(cell);
       let newRowNumber = getRowNumber(cell) + 1;
       let focusCellId =  cellColumn + "-" + newRowNumber;
       createTableRow(focusCellId);
@@ -24,19 +24,13 @@ dataTable.addEventListener("keydown", function(event){
       break;
     case 8: // BACKSPACE key
       let cellContent = getCellContent(cell);
-      if (cellContent === ""){
+      if (cellColumn === "x" && cellContent === ""){
         gotoPreviousRow(cell);
+        removeTableRow(cell);
       }
       break;
   }
 });
-let getCellId = function(cell){
-  return cell.getAttribute("id");
-}
-let getCellContent = function(cell){
-  let cellId = getCellId(cell);
-  return dataTable.querySelector("input#" + cellId).value;
-}
 let gotoPreviousRow = function(cell){
   let currentRowNumber = getRowNumber(cell);
   let currentColumn = getColumn(cell);
@@ -105,6 +99,23 @@ let getColumn = function(cell){
   let cellId = cell.getAttribute("id");
   return cellId.substring(0, cellId.indexOf("-")); // return "x", or "y"
 }
+let getCellId = function(cell){
+  return cell.getAttribute("id");
+}
+let getCellContent = function(cell){
+  let cellId = getCellId(cell);
+  return dataTable.querySelector("input#" + cellId).value;
+}
+let getXCell = function(cellRow){
+  let xCellId = "x-" + cellRow;
+  let xCell = dataTable.querySelector("input#" + xCellId);
+  return xCell;
+}
+let getYCell = function(cellRow){
+  let yCellId = "y-" + cellRow;
+  let yCell = dataTable.querySelector("input#" + yCellId);
+  return yCell;
+}
 let evalTableRow = function(currentRowNumber){
   let currentXCell = dataTable.querySelector("#x-" + currentRowNumber);
   let currentXValue = currentXCell.value;
@@ -155,4 +166,33 @@ let createTableRow = function(focusCellId){
   console.log("focusCellId: " + focusCellId);
   let focusCell = dataTable.querySelector("input#" + focusCellId);
   focusCell.focus();
+}
+let removeTableRow = function(cell){
+  let cellRow = getRowNumber(cell);
+  if (cellRow === -1){ // header row
+    //can't remove header row
+  } else{
+    // remove the whole row
+    let xCell = getXCell(cellRow);
+    let yCell = getYCell(cellRow);
+    // remove newline break
+    let linebreak = yCell.nextSibling;
+    xCell.remove();
+    yCell.remove();
+    decrementRowNumbers(cellRow + 1);
+    rowNumber--;
+    if (linebreak.tagName.toUpperCase() === "BR"){ // check if the element is a linebreak
+      linebreak.remove();
+    }
+  }
+}
+let decrementRowNumbers = function(cellRow){
+  console.log("cellRow: " + cellRow);
+  for (let i = cellRow; i < rowNumber; i++){
+    let xCell = getXCell(i);
+    let yCell = getYCell(i);
+    let newRowNumber = i - 1;
+    xCell.setAttribute("id", "x-" + newRowNumber);
+    yCell.setAttribute("id", "y-" + newRowNumber);
+  }
 }
