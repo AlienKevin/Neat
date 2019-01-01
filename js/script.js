@@ -279,6 +279,7 @@ let evalExpr = function(input) {
     // }
   }
   removeImagineryResults(result);
+  removeDuplicatedResults(result);
   console.log("result after removing imagineries: " + result);
   // convert fractions in result to decimals
   // result = result.text("decimal");
@@ -306,9 +307,25 @@ let deleteVars = function() {
   nerdamer.clearVars();
   return tempVars;
 }
+let removeDuplicatedResults = function(result){
+  console.log("removing duplicated results");
+  if (result instanceof Array){
+    for (let i = 0; i < result.length; i++) {
+      let element = result[i];
+      for (let j = 0; j < i; j++){
+        if (element.valueOf() === result[j].valueOf()){
+          result.splice(i,1);
+          i--;
+        }
+      }
+    }
+  }
+}
 let removeImagineryResults = function(result) {
   if (result instanceof Array) { // result is an array of Symbols
     for (let i = 0; i < result.length; i++) {
+      console.log("i: " + i);
+      console.log("result: " + result);
       let elementDeleted = removeImagineryElements(result[i], result, i);
       if (elementDeleted) {
         i--;
@@ -319,7 +336,7 @@ let removeImagineryResults = function(result) {
   }
 }
 let removeImagineryElements = function(symbol, result, index) {
-  console.log("symbol: " + symbol);
+  console.log("symbol: ", symbol);
   let elements = symbol.elements;
   if (elements !== undefined) {
     //remove imaginery results
@@ -338,7 +355,9 @@ let removeImagineryElements = function(symbol, result, index) {
       if (symbol.value.indexOf === undefined) { // values like Infinity
         // do nothing
       } else if (symbol.value.indexOf("i") >= 0) {
+        console.log("i found!");
         if (result instanceof Array) { // prevent deleting result containing function names like "sin"
+        console.log("result is trimmed!");
           result.splice(index, 1);
           return true;
         }
@@ -375,9 +394,11 @@ let handleSolveEquations = function(expr) {
     try {
       if (paramList[1] !== undefined) {
         result = nerdamer.solveEquations(paramList[0], paramList[1]);
+        evaluateSymbols(result);
         console.log("result: " + result);
       } else {
         result = nerdamer.solveEquations(paramList[0]);
+        evaluateSymbols(result);
         result = formatArrayResults(result);
       }
     } catch (e) { // handle error like attempting to solve non-linear system of equations
@@ -391,6 +412,15 @@ let handleSolveEquations = function(expr) {
   } else {
     return false;
   }
+}
+
+let evaluateSymbols = function(array){
+  console.log("result.length: " + array.length);
+  for (let i = 0; i < array.length; i++){
+    array[i] = nerdamer(array[i]).evaluate().symbol;
+    console.log("resul[" + i + "]: " + array[i]);
+  }
+  console.log("results: ", array);
 }
 
 let formatArrayResults = function(result) {
