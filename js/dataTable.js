@@ -2,12 +2,12 @@ let createTableBtn = document.querySelector("button#createTableBtn");
 let rowNumber = 0;
 let xVar = "x"; // default independent variable set to "x"
 let equation = "2*x"; //default demo equation
-createTableBtn.addEventListener("click", function(event) {
+createTableBtn.addEventListener("click", function (event) {
   console.log("initializing data table");
   createTableHeader();
 })
 let dataTable = document.querySelector("div#dataTable");
-dataTable.addEventListener("keydown", function(event) {
+dataTable.addEventListener("keydown", function (event) {
   let cell = event.target;
   let cellColumn = getColumn(cell);
   let cellRow = getRowNumber(cell);
@@ -34,7 +34,50 @@ dataTable.addEventListener("keydown", function(event) {
       break;
   }
 });
-let gotoPreviousRow = function(cell) {
+// automatically extend y-header to accomodate longer equations
+// source: https://stackoverflow.com/questions/7168727/make-html-text-input-field-grow-as-i-type by Paulpro with modifications
+let autoAdjustTableHeader = function () {
+  const yHeader = document.querySelector('#y-header');
+  const vw = document.documentElement.clientWidth; // get the width of the screen
+  const headerWidth = getCoreWidth(yHeader); // get the original styled width
+  const min = headerWidth,
+    max = Math.floor(vw * 0.7),
+    pad_right = 0;
+  console.log('min', min);
+  if (yHeader !== null) {
+    // input.style.width = min+'px';
+    yHeader.addEventListener('input', function () {
+      console.log("input's content changed!");
+      var input = this;
+      setTimeout(function () {
+        var tmp = document.createElement('div');
+        tmp.style.padding = '0';
+        if (getComputedStyle)
+          tmp.style.cssText = getComputedStyle(input, null).cssText;
+        if (input.currentStyle)
+          tmp.style = input.currentStyle;
+        tmp.style.width = '';
+        tmp.style.position = 'absolute';
+        tmp.innerHTML = input.value.replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;")
+          .replace(/ /g, '&nbsp;');
+        input.parentNode.appendChild(tmp);
+        var width = tmp.clientWidth + pad_right + 1;
+        console.log('width', width);
+        tmp.parentNode.removeChild(tmp);
+        if (min <= width && width <= max) {
+          input.style.width = width + 'px';
+        } else if (width < min) {
+          input.style.width = min + 'px';
+        }
+      }, 1);
+    });
+  }
+};
+let gotoPreviousRow = function (cell) {
   let currentRowNumber = getRowNumber(cell);
   let currentColumn = getColumn(cell);
   let previousCellId;
@@ -49,7 +92,7 @@ let gotoPreviousRow = function(cell) {
   let previousCell = dataTable.querySelector("input#" + previousCellId);
   previousCell.focus();
 }
-let gotoNextRow = function(cell) {
+let gotoNextRow = function (cell) {
   let currentRowNumber = getRowNumber(cell);
   let currentColumn = getColumn(cell);
   let nextCellId = currentColumn + "-" + (currentRowNumber + 1);
@@ -60,7 +103,7 @@ let gotoNextRow = function(cell) {
     createTableRow(nextCellId);
   }
 }
-dataTable.addEventListener("keyup", function(event) {
+dataTable.addEventListener("keyup", function (event) {
   let cell = event.target;
   switch (event.keyCode) {
     case 13: // ENTER key
@@ -89,7 +132,7 @@ dataTable.addEventListener("keyup", function(event) {
       }
   }
 });
-let getRowNumber = function(cell) {
+let getRowNumber = function (cell) {
   let cellId = cell.getAttribute("id");
   let rowNumber = cellId.substring(cellId.indexOf("-") + 1, cellId.length);
   if (rowNumber === "header") {
@@ -98,28 +141,28 @@ let getRowNumber = function(cell) {
     return Number(rowNumber); // other non-header rows have zero-based indexes
   }
 }
-let getColumn = function(cell) {
+let getColumn = function (cell) {
   let cellId = cell.getAttribute("id");
   return cellId.substring(0, cellId.indexOf("-")); // return "x", or "y"
 }
-let getCellId = function(cell) {
+let getCellId = function (cell) {
   return cell.getAttribute("id");
 }
-let getCellContent = function(cell) {
+let getCellContent = function (cell) {
   let cellId = getCellId(cell);
   return dataTable.querySelector("input#" + cellId).value;
 }
-let getXCell = function(cellRow) {
+let getXCell = function (cellRow) {
   let xCellId = "x-" + cellRow;
   let xCell = dataTable.querySelector("input#" + xCellId);
   return xCell;
 }
-let getYCell = function(cellRow) {
+let getYCell = function (cellRow) {
   let yCellId = "y-" + cellRow;
   let yCell = dataTable.querySelector("input#" + yCellId);
   return yCell;
 }
-let evalTableRow = function(currentRowNumber) {
+let evalTableRow = function (currentRowNumber) {
   let currentXCell = dataTable.querySelector("#x-" + currentRowNumber);
   let currentXValue = currentXCell.value;
   let currentYCell = dataTable.querySelector("#y-" + currentRowNumber);
@@ -132,7 +175,7 @@ let evalTableRow = function(currentRowNumber) {
     currentYCell.value = result;
   }
 }
-let createTableHeader = function() {
+let createTableHeader = function () {
   let xCellHeader = document.createElement("input");
   xCellHeader.setAttribute("class", "tableCell");
   xCellHeader.setAttribute("id", "x-header");
@@ -147,11 +190,13 @@ let createTableHeader = function() {
   yCellHeader.setAttribute("spellcheck", false);
   dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
+  // set up auto expansion for table header to accomodate long equations
+  autoAdjustTableHeader();
   // create a close button to delete the whole table
   let closeBtn = document.createElement("span");
   closeBtn.setAttribute("class", "close");
   closeBtn.innerHTML = "x";
-  closeBtn.addEventListener("click", function() {
+  closeBtn.addEventListener("click", function () {
     clearElement(dataTable);
   });
   dataTable.appendChild(closeBtn);
@@ -166,7 +211,7 @@ let createTableHeader = function() {
   let hintResult = nerdamer(equation).evaluate().text("decimals");
   hintYCell.setAttribute("placeholder", hintResult);
 }
-let createTableRow = function(focusCellId) {
+let createTableRow = function (focusCellId) {
   let xCell = document.createElement("input");
   xCell.setAttribute("class", "tableCell");
   xCell.setAttribute("size", 2);
@@ -174,7 +219,7 @@ let createTableRow = function(focusCellId) {
   xCell.setAttribute("spellcheck", false);
   let yCell = document.createElement("input");
   yCell.setAttribute("class", "tableCell");
-  yCell.setAttribute("size", 2);
+  yCell.setAttribute("size", 10);
   yCell.setAttribute("id", "y-" + rowNumber);
   yCell.setAttribute("spellcheck", false);
   yCell.readOnly = true;
@@ -186,11 +231,11 @@ let createTableRow = function(focusCellId) {
   let focusCell = dataTable.querySelector("input#" + focusCellId);
   focusCell.focus();
 }
-let appendRow = function(cell) {
+let appendRow = function (cell) {
   let focusCellId = cellColumn + "-" + (rowNumber + 1);
   createTableRow(focusCellId);
 }
-let removeTableRow = function(cell) {
+let removeTableRow = function (cell) {
   let cellRow = getRowNumber(cell);
   if (cellRow === -1) { // header row
     //can't remove header row
@@ -209,7 +254,7 @@ let removeTableRow = function(cell) {
     }
   }
 }
-let decrementRowNumbers = function(cellRow) {
+let decrementRowNumbers = function (cellRow) {
   console.log("cellRow: " + cellRow);
   for (let i = cellRow; i < rowNumber; i++) {
     let xCell = getXCell(i);
@@ -221,8 +266,25 @@ let decrementRowNumbers = function(cellRow) {
 }
 // clear all childrens of a given element
 // by Gabriel McAdams on StackOverflow
-let clearElement = function(element) {
+let clearElement = function (element) {
   while (element.firstChild) {
     element.removeChild(element.firstChild);
   }
+}
+
+let getCoreWidth = function (element) {
+  var cs = getComputedStyle(element);
+  var paddingX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  var borderX = parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
+  // Element width minus padding and border
+  elementWidth = element.offsetWidth - paddingX - borderX;
+  return elementWidth;
+}
+let getCoreHeight = function (element) {
+  var cs = getComputedStyle(element);
+  var paddingY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  var borderY = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+  // Element width minus padding and border
+  elementHeight = element.offsetHeight - paddingY - borderY;
+  return elementHeight;
 }
