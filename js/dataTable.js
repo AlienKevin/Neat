@@ -2,6 +2,7 @@ let createTableBtn = document.querySelector("button#createTableBtn");
 let rowNumber = 0;
 let xVar = "x"; // default independent variable set to "x"
 let equation = "2*x"; //default demo equation
+let inFractions = false; // default result is displayed in decimals
 createTableBtn.addEventListener("click", function (event) {
   console.log("initializing data table");
   createTableHeader();
@@ -195,6 +196,20 @@ let createTableHeader = function () {
   dataTable.appendChild(yCellHeader);
   // set up auto expansion for table header to accomodate long equations
   autoScaleYHeader();
+  // create a fractions/decimals switch button
+  // <span class="icon-fractions"></span>
+  let fractionsBtn = document.createElement("button");
+  fractionsBtn.setAttribute("class", "icon-fractions");
+  fractionsBtn.addEventListener("click", function () {
+    inFractions = !inFractions;
+    if (inFractions === true) {
+      fractionsBtn.style.background = "gray";
+    } else {
+      fractionsBtn.style.background = "white";
+    }
+
+  })
+  dataTable.appendChild(fractionsBtn);
   // create a close button to delete the whole table
   let closeBtn = document.createElement("span");
   closeBtn.setAttribute("class", "close");
