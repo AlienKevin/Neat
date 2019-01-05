@@ -117,12 +117,7 @@ dataTable.addEventListener("keyup", function (event) {
       break;
     default: // all other keys
       let cellId = event.target.getAttribute("id");
-      if (cellId.endsWith("header")) { // table header
-        if (cellId.startsWith("x")) {
-          // set independent var
-          xVar = event.target.value;
-        }
-      } else {
+      if (!cellId.endsWith("header")) { // table rows, not header
         let currentRowNumber = getRowNumber(cell);
         evalTableRow(currentRowNumber);
       }
@@ -168,9 +163,9 @@ let evalTableRow = function (currentRowNumber) {
   } else {
     nerdamer.setVar(xVar, currentXValue);
     let mode;
-    if (inFractions){
+    if (inFractions) {
       mode = "fractions";
-    } else{
+    } else {
       mode = "decimals";
     }
     let result = nerdamer(equation).evaluate().text(mode);
@@ -180,9 +175,19 @@ let evalTableRow = function (currentRowNumber) {
 }
 // evaluate the whole data table
 let evalTable = function () {
+  updateVariable();
+  updateEquation();
   for (let i = 0; i < rowNumber; i++) {
     evalTableRow(i);
   }
+}
+let updateVariable = function () {
+  let xHeaderCell = dataTable.querySelector("#x-header");
+  xVar = xHeaderCell.value;
+}
+let updateEquation = function () {
+  let yHeaderCell = dataTable.querySelector("#y-header");
+  equation = yHeaderCell.value;
 }
 let createTableHeader = function () {
   let xCellHeader = document.createElement("input");
@@ -197,12 +202,14 @@ let createTableHeader = function () {
   yCellHeader.setAttribute("size", 10);
   yCellHeader.setAttribute("value", "2x");
   yCellHeader.setAttribute("spellcheck", false);
-  dataTable.appendChild(xCellHeader);
-  dataTable.appendChild(yCellHeader);
-  yCellHeader.addEventListener("input", function () {
-    equation = yCellHeader.value;
+  xCellHeader.addEventListener("input", function () {
     evalTable();
   });
+  yCellHeader.addEventListener("input", function () {
+    evalTable();
+  });
+  dataTable.appendChild(xCellHeader);
+  dataTable.appendChild(yCellHeader);
   // set up auto expansion for table header to accomodate long equations
   autoScaleYHeader();
   // create a fractions/decimals switch button
@@ -231,14 +238,6 @@ let createTableHeader = function () {
   dataTable.appendChild(closeBtn);
   dataTable.appendChild(document.createElement("br")); //create a line break
   createTableRow("x-0"); // create and focus on a new data row
-  // create placeholder for hinting
-  let hintXValue = 1.5;
-  let hintXCell = getXCell(0);
-  hintXCell.setAttribute("placeholder", hintXValue);
-  let hintYCell = getYCell(0);
-  nerdamer.setVar(xVar, hintXValue);
-  let hintResult = nerdamer(equation).evaluate().text("decimals");
-  hintYCell.setAttribute("placeholder", hintResult);
 }
 let createTableRow = function (focusCellId) {
   let xCell = document.createElement("input");
