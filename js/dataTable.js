@@ -121,14 +121,6 @@ dataTable.addEventListener("keyup", function (event) {
         if (cellId.startsWith("x")) {
           // set independent var
           xVar = event.target.value;
-        } else {
-          // set equation used
-          equation = event.target.value;
-          // update all data values
-          console.log("reevaluating all data values");
-          for (let i = 0; i < rowNumber; i++) {
-            evalTableRow(i);
-          }
         }
       } else {
         let currentRowNumber = getRowNumber(cell);
@@ -166,6 +158,7 @@ let getYCell = function (cellRow) {
   let yCell = dataTable.querySelector("input#" + yCellId);
   return yCell;
 }
+// evaluate a selected row in the data table
 let evalTableRow = function (currentRowNumber) {
   let currentXCell = dataTable.querySelector("#x-" + currentRowNumber);
   let currentXValue = currentXCell.value;
@@ -179,8 +172,9 @@ let evalTableRow = function (currentRowNumber) {
     currentYCell.value = result;
   }
 }
-let evalTable = function(){
-  for (let i = 0; i < rowNumber; i++){
+// evaluate the whole data table
+let evalTable = function () {
+  for (let i = 0; i < rowNumber; i++) {
     evalTableRow(i);
   }
 }
@@ -197,11 +191,12 @@ let createTableHeader = function () {
   yCellHeader.setAttribute("size", 10);
   yCellHeader.setAttribute("value", "2x");
   yCellHeader.setAttribute("spellcheck", false);
-  yCellHeader.addEventListener("input", function(){
-    evalTable();
-  });
   dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
+  yCellHeader.addEventListener("input", function () {
+    equation = yCellHeader.value;
+    evalTable();
+  });
   // set up auto expansion for table header to accomodate long equations
   autoScaleYHeader();
   // create a fractions/decimals switch button
@@ -215,7 +210,7 @@ let createTableHeader = function () {
     } else {
       fractionsBtn.style.background = "white";
     }
-
+    evalTable();
   })
   dataTable.appendChild(fractionsBtn);
   // create a close button to delete the whole table
