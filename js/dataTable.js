@@ -35,18 +35,22 @@ dataTable.addEventListener("keydown", function (event) {
   }
 });
 // automatically extend y-header to accomodate longer equations
-// source: https://stackoverflow.com/questions/7168727/make-html-text-input-field-grow-as-i-type by Paulpro with modifications
-let autoAdjustTableHeader = function () {
+let autoScaleYHeader = function () {
   const yHeader = document.querySelector('#y-header');
   const vw = document.documentElement.clientWidth; // get the width of the screen
   const headerWidth = getCoreWidth(yHeader); // get the original styled width
   const min = headerWidth,
     max = Math.floor(vw * 0.7),
     pad_right = 0;
-  console.log('min', min);
-  if (yHeader !== null) {
-    // input.style.width = min+'px';
-    yHeader.addEventListener('input', function () {
+  autoScaleInput(yHeader, min, max, pad_right);
+}
+
+// automatically scale input box to fit long inputs
+// source: https://stackoverflow.com/questions/7168727/make-html-text-input-field-grow-as-i-type by Paulpro with modifications
+let autoScaleInput = function (input, min, max, pad_right) {
+  if (input !== null) {
+    input.style.width = min + 'px';
+    input.addEventListener('input', function () {
       console.log("input's content changed!");
       var input = this;
       setTimeout(function () {
@@ -66,7 +70,6 @@ let autoAdjustTableHeader = function () {
           .replace(/ /g, '&nbsp;');
         input.parentNode.appendChild(tmp);
         var width = tmp.clientWidth + pad_right + 1;
-        console.log('width', width);
         tmp.parentNode.removeChild(tmp);
         if (min <= width && width <= max) {
           input.style.width = width + 'px';
@@ -191,7 +194,7 @@ let createTableHeader = function () {
   dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
   // set up auto expansion for table header to accomodate long equations
-  autoAdjustTableHeader();
+  autoScaleYHeader();
   // create a close button to delete the whole table
   let closeBtn = document.createElement("span");
   closeBtn.setAttribute("class", "close");
