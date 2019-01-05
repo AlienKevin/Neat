@@ -17,12 +17,12 @@ let convertToLaTeX = converToLaTexDefault;
 const displayInLaTeXDefault = true;
 let displayInLaTeX = displayInLaTeXDefault;
 //create initial input and output on page load
-document.addEventListener("DOMContentLoaded", function(event) {
+document.addEventListener("DOMContentLoaded", function (event) {
   createNewField();
 })
 
 //listen for keyboard events in the input box and update result display in output box
-mathField.addEventListener("keyup", function(event) {
+mathField.addEventListener("keyup", function (event) {
   //if key pressed is ENTER, UP Arrow, DOWN Arrow, return immediately
   if (event.keyCode === 13 || event.keyCode === 38 || event.keyCode === 40) {
     return;
@@ -30,7 +30,7 @@ mathField.addEventListener("keyup", function(event) {
   const currentInput = event.target;
   updateOutput(currentInput);
 });
-let updateOutput = function(currentInput){
+let updateOutput = function (currentInput) {
   const inputId = currentInput.getAttribute("id");
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
   const output = mathField.querySelectorAll("span.output")[currentInputNumber];
@@ -46,7 +46,7 @@ let updateOutput = function(currentInput){
       output.innerHTML = '<div id="errorIcon" class="material-icons" style="font-size: 40px; position: relative; top: 10px">warning</div>'; // warning symbol
       let errorIcon = output.querySelector("div#errorIcon");
       errorIcon.className += " not-selectable"; // set error icon to be not selectable
-      output.addEventListener("mousemove", function(event) {
+      output.addEventListener("mousemove", function (event) {
         let errorMsg = output.querySelector("div.errorMsg");
         if (isHovered(errorIcon)) {
           // console.log("errorMsg is hovered");
@@ -94,11 +94,11 @@ let updateOutput = function(currentInput){
   }
 }
 // check if an element is hovered
-let isHovered = function(element) {
+let isHovered = function (element) {
   return element.matches(":hover");
 }
 //listen for keydown events of ENTER, UP arrow, and DOWN arrow keys to react immediately
-mathField.addEventListener("keydown", function(event) {
+mathField.addEventListener("keydown", function (event) {
   const currentInput = event.target;
   const inputId = currentInput.getAttribute("id");
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
@@ -123,6 +123,7 @@ mathField.addEventListener("keydown", function(event) {
   } else if (event.keyCode === 8) { //BACKSPACE key is pressed
     // input is empty and is NOT the first input box
     if (currentInput.value === "" && currentInputNumber != 0) {
+      event.preventDefault(); // prevent BACKSPACE from deleting previous inputs
       //remove current input box and associated output box
       currentInput.remove();
       const currentOutput = mathField.querySelector("#output-" + (currentInputNumber));
@@ -147,7 +148,7 @@ mathField.addEventListener("keydown", function(event) {
   }
 });
 //create a new input box
-let createNewInput = function() {
+let createNewInput = function () {
   const newInput = document.createElement("input");
   newInput.setAttribute("type", "text");
   newInput.setAttribute("size", "30");
@@ -157,14 +158,14 @@ let createNewInput = function() {
   return newInput;
 }
 //create a new output box
-let createNewOutput = function() {
+let createNewOutput = function () {
   const newOutput = document.createElement("span");
   newOutput.setAttribute("class", "output");
   newOutput.setAttribute("id", "output-" + inputNumber);
   return newOutput;
 }
 //create a new field with an input box and output box
-let createNewField = function() {
+let createNewField = function () {
   const newInput = createNewInput();
   const newOutput = createNewOutput();
   mathField.appendChild(newInput);
@@ -173,19 +174,19 @@ let createNewField = function() {
   inputNumber++;
 }
 //move caret to the end of input string
-let moveCaretToEnd = function(input) {
+let moveCaretToEnd = function (input) {
   input.setSelectionRange(input.value.length, input.value.length);
 }
 // evaluate all input boxes
-let evaluateAll = function(){
-  for (let i = 0; i < inputNumber; i++){
+let evaluateAll = function () {
+  for (let i = 0; i < inputNumber; i++) {
     let inputId = "#input-" + i;
     let input = mathField.querySelector(inputId);
     updateOutput(input);
   }
 }
 //evaluate expression inside an input box
-let evalExpr = function(input) {
+let evalExpr = function (input) {
   let tempVars = deleteVars();
   const expr = input.value;
   console.log("expr: " + expr);
@@ -248,7 +249,7 @@ class Error {
     this.message = message;
   }
 }
-let deleteVars = function() {
+let deleteVars = function () {
   let vars = nerdamer.getVars();
   let tempVars = {};
   for (let varName in vars) {
@@ -258,21 +259,21 @@ let deleteVars = function() {
   nerdamer.clearVars();
   return tempVars;
 }
-let removeDuplicatedResults = function(result){
+let removeDuplicatedResults = function (result) {
   console.log("removing duplicated results");
-  if (result instanceof Array){
+  if (result instanceof Array) {
     for (let i = 0; i < result.length; i++) {
       let element = result[i];
-      for (let j = 0; j < i; j++){
-        if (element.valueOf() === result[j].valueOf()){
-          result.splice(i,1);
+      for (let j = 0; j < i; j++) {
+        if (element.valueOf() === result[j].valueOf()) {
+          result.splice(i, 1);
           i--;
         }
       }
     }
   }
 }
-let removeImagineryResults = function(result) {
+let removeImagineryResults = function (result) {
   if (result instanceof Array) { // result is an array of Symbols
     for (let i = 0; i < result.length; i++) {
       console.log("i: " + i);
@@ -286,7 +287,7 @@ let removeImagineryResults = function(result) {
     removeImagineryElements(result.symbol, result);
   }
 }
-let removeImagineryElements = function(symbol, result, index) {
+let removeImagineryElements = function (symbol, result, index) {
   console.log("symbol: ", symbol);
   let elements = symbol.elements;
   if (elements !== undefined) {
@@ -308,7 +309,7 @@ let removeImagineryElements = function(symbol, result, index) {
       } else if (symbol.value.indexOf("i") >= 0) {
         console.log("i found!");
         if (result instanceof Array) { // prevent deleting result containing function names like "sin"
-        console.log("result is trimmed!");
+          console.log("result is trimmed!");
           result.splice(index, 1);
           return true;
         }
@@ -318,7 +319,7 @@ let removeImagineryElements = function(symbol, result, index) {
   return false;
 }
 //handle solveEquations command
-let handleSolveEquations = function(expr) {
+let handleSolveEquations = function (expr) {
   const equalsIndex = expr.indexOf("=");
   const doubleEqualsIndex = expr.indexOf("==");
   if (equalsIndex >= 0 && doubleEqualsIndex === -1) { // only matching single equal sign
@@ -365,16 +366,16 @@ let handleSolveEquations = function(expr) {
   }
 }
 
-let evaluateSymbols = function(array){
+let evaluateSymbols = function (array) {
   console.log("result.length: " + array.length);
-  for (let i = 0; i < array.length; i++){
+  for (let i = 0; i < array.length; i++) {
     array[i] = nerdamer(array[i]).evaluate().symbol;
     console.log("resul[" + i + "]: " + array[i]);
   }
   console.log("results: ", array);
 }
 
-let formatArrayResults = function(result) {
+let formatArrayResults = function (result) {
   let displayed = "{";
   for (let i = 0; i < result.length; i++) {
     displayed += result[i][0] + " = " + result[i][1];
@@ -387,7 +388,7 @@ let formatArrayResults = function(result) {
   return displayed;
 }
 
-let convertToDecimals = function(result) {
+let convertToDecimals = function (result) {
   if (result instanceof Array) { //an array result
     console.log("converting an array result to decimals");
     for (let i = 0; i < result.length; i++) {
@@ -409,7 +410,7 @@ let convertToDecimals = function(result) {
 }
 
 //find matching parenthesis within a given string from the start index
-let findMatchingParen = function(string, start) {
+let findMatchingParen = function (string, start) {
   let stack = [];
   for (let i = start; i < string.length; i++) {
     let current = string.charAt(i);
