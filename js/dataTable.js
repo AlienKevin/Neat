@@ -212,9 +212,11 @@ let createTableHeader = function () {
   fractionsBtn.addEventListener("click", function () {
     inFractions = !inFractions;
     if (inFractions === true) {
-      fractionsBtn.style.background = "gray";
+      fractionsBtn.classList.add("fractionsMode");
+      fractionsBtn.classList.remove("decimalsMode");
     } else {
-      fractionsBtn.style.background = "white";
+      fractionsBtn.classList.add("decimalsMode");
+      fractionsBtn.classList.remove("fractionsMode");
     }
     evalTable();
   })

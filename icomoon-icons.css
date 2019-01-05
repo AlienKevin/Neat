@@ -28,3 +28,17 @@
 .icon-fractions:before {
   content: "\e900";
 }
+
+.icon-fractions{
+  margin-right: 10px;
+}
+
+.icon-fractions.fractionsMode{
+  color: white;
+  background: gray;
+}
+
+.icon-fractions.decimalsMode{
+  color: black;
+  background: white;
+}
