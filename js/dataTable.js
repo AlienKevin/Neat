@@ -167,7 +167,13 @@ let evalTableRow = function (currentRowNumber) {
     currentYCell.value = "";
   } else {
     nerdamer.setVar(xVar, currentXValue);
-    let result = nerdamer(equation).evaluate().text("decimals");
+    let mode;
+    if (inFractions){
+      mode = "fractions";
+    } else{
+      mode = "decimals";
+    }
+    let result = nerdamer(equation).evaluate().text(mode);
     console.log("result: " + result);
     currentYCell.value = result;
   }
