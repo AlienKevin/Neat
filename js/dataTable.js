@@ -179,6 +179,11 @@ let evalTableRow = function (currentRowNumber) {
     currentYCell.value = result;
   }
 }
+let evalTable = function(){
+  for (let i = 0; i < rowNumber; i++){
+    evalTableRow(i);
+  }
+}
 let createTableHeader = function () {
   let xCellHeader = document.createElement("input");
   xCellHeader.setAttribute("class", "tableCell");
@@ -192,6 +197,9 @@ let createTableHeader = function () {
   yCellHeader.setAttribute("size", 10);
   yCellHeader.setAttribute("value", "2x");
   yCellHeader.setAttribute("spellcheck", false);
+  yCellHeader.addEventListener("input", function(){
+    evalTable();
+  });
   dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
   // set up auto expansion for table header to accomodate long equations
