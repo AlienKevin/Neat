@@ -1,5 +1,6 @@
 let createTableBtn = document.querySelector("button#createTableBtn");
 let rowNumber = 0;
+let colNumber = 1; // first column starts from y-0-header, x-header is not included
 let xVar = "x"; // default independent variable set to "x"
 let equation = "2*x"; //default demo equation
 let inFractions = false; // default result is displayed in decimals
@@ -11,7 +12,9 @@ let dataTable = document.querySelector("div#dataTable");
 dataTable.addEventListener("keydown", function (event) {
   let cell = event.target;
   let cellColumn = getColumn(cell);
+  console.log('cellColumn', cellColumn);
   let cellRow = getRowNumber(cell);
+  console.log('cellRow', cellRow);
   switch (event.keyCode) {
     case 13: // ENTER key
       if (cellRow === rowNumber) { // last row
@@ -27,7 +30,7 @@ dataTable.addEventListener("keydown", function (event) {
       gotoNextRow(cell);
       break;
     case 8: // BACKSPACE key
-      let cellContent = getCellContent(cell);
+      let cellContent = cell.value;
       if (cellColumn === "x" && cellContent === "") {
         gotoPreviousRow(cell);
         removeTableRow(cell);
@@ -35,9 +38,9 @@ dataTable.addEventListener("keydown", function (event) {
       break;
   }
 });
-// automatically extend y-header to accomodate longer equations
-let autoScaleYHeader = function () {
-  const yHeader = document.querySelector('#y-header');
+/** automatically extend y-header to accomodate longer equations*/
+let autoScaleYHeader = function (cellCol) {
+  const yHeader = document.getElementById(composeCellId("y", cellCol, "header"));
   const vw = document.documentElement.clientWidth; // get the width of the screen
   const headerWidth = getCoreWidth(yHeader); // get the original styled width
   const min = headerWidth,
@@ -84,23 +87,26 @@ let autoScaleInput = function (input, min, max, pad_right) {
 let gotoPreviousRow = function (cell) {
   let currentRowNumber = getRowNumber(cell);
   let currentColumn = getColumn(cell);
+  let currentColNumber = getColNumber(cell);
   let previousCellId;
   if (currentRowNumber > 0) { // after the first non-header row
-    previousCellId = currentColumn + "-" + (currentRowNumber - 1);
+    previousCellId = composeCellId(currentColumn, currentColNumber, currentRowNumber - 1);
   } else if (currentRowNumber === 0) { // at the first non-header row
-    previousCellId = currentColumn + "-" + "header";
+    previousCellId = composeCellId(currentColumn, currentColNumber, "header");
   } else if (currentRowNumber === -1) { // at header row
-    previousCellId = currentColumn + "-" + "header"; // stay at the same row
+    previousCellId = composeCellId(currentColumn, currentColNumber, "header"); // stay at the same row
   }
   // console.log("previousCellId: " + previousCellId);
-  let previousCell = dataTable.querySelector("input#" + previousCellId);
+  let previousCell = document.getElementById(previousCellId);
   previousCell.focus();
 }
 let gotoNextRow = function (cell) {
   let currentRowNumber = getRowNumber(cell);
   let currentColumn = getColumn(cell);
-  let nextCellId = currentColumn + "-" + (currentRowNumber + 1);
-  let nextCell = dataTable.querySelector("input#" + nextCellId);
+  let currentColNumber = getColNumber(cell);
+  let nextCellId = composeCellId(currentColumn, currentColNumber, currentRowNumber + 1);
+  let nextCell = document.getElementById(nextCellId);
+  console.log("nextCell: ", nextCell);
   if (nextCell !== null) { // next cell exists
     nextCell.focus();
   } else { // next cell doesn't exist
@@ -123,70 +129,103 @@ dataTable.addEventListener("keyup", function (event) {
       }
   }
 });
+/**
+ * Get row number of a table cell
+ * @param {Element} cell
+ * @returns {number} the row number
+ */
 let getRowNumber = function (cell) {
   let cellId = cell.getAttribute("id");
-  let rowNumber = cellId.substring(cellId.indexOf("-") + 1, cellId.length);
+  let rowNumber = cellId.substring(cellId.lastIndexOf("-") + 1, cellId.length);
   if (rowNumber === "header") {
     return -1; // header's row number is -1, because 0 is the first non-header row
   } else {
     return Number(rowNumber); // other non-header rows have zero-based indexes
   }
 }
+/**
+ * Get column name of a table cell
+ * @param {Element} cell
+ * @returns {string} "x", or "y"
+ */
 let getColumn = function (cell) {
   let cellId = cell.getAttribute("id");
-  return cellId.substring(0, cellId.indexOf("-")); // return "x", or "y"
+  return cellId.substring(0, cellId.indexOf("-"));
 }
-let getCellId = function (cell) {
-  return cell.getAttribute("id");
+let getColNumber = function (cell) {
+  if (getColumn(cell) === "y") { // only y cells have column numbers
+    let cellId = cell.getAttribute("id");
+    return Number(cellId.substring(cellId.indexOf("-") + 1, cellId.lastIndexOf("-")));
+  } // x cells return undefined
 }
-let getCellContent = function (cell) {
-  let cellId = getCellId(cell);
-  return dataTable.querySelector("input#" + cellId).value;
-}
-let getXCell = function (cellRow) {
-  let xCellId = "x-" + cellRow;
-  let xCell = dataTable.querySelector("input#" + xCellId);
-  return xCell;
-}
-let getYCell = function (cellRow) {
-  let yCellId = "y-" + cellRow;
-  let yCell = dataTable.querySelector("input#" + yCellId);
-  return yCell;
-}
-// evaluate a selected row in the data table
-let evalTableRow = function (currentRowNumber) {
-  let currentXCell = dataTable.querySelector("#x-" + currentRowNumber);
-  let currentXValue = currentXCell.value;
-  let currentYCell = dataTable.querySelector("#y-" + currentRowNumber);
-  if (currentXValue === "") {
-    currentYCell.value = "";
-  } else {
-    nerdamer.setVar(xVar, currentXValue);
-    let mode;
-    if (inFractions) {
-      mode = "fractions";
-    } else {
-      mode = "decimals";
+/** compose id for table cells,
+when cellCol === "x",
+a can represent row number then b should be undefined,
+a can also be undefined then b should represent row number;
+when cellCol === "y",
+a is row number,
+b is column number
+@param {string} cellCol - either "x" or "y"
+@param {number} a
+@param {number} b
+*/
+let composeCellId = function (cellCol, a, b) {
+  if (cellCol === "x") {
+    if (a !== undefined && b === undefined){
+      return "x-" + a;
+    } else if (a === undefined && b !== undefined){
+      return "x-" + b;
     }
-    let result = nerdamer(equation).evaluate().text(mode);
-    console.log("result: " + result);
-    currentYCell.value = result;
+  } else if (cellCol === "y") {
+    return "y-" + a + "-" + b;
   }
 }
-// evaluate the whole data table
+let getXCell = function (cellRow) {
+  let xCellId = composeCellId("x", cellRow);
+  let xCell = document.getElementById(xCellId);
+  return xCell;
+}
+let getYCell = function (cellCol, cellRow) {
+  let yCellId = composeCellId("y", cellCol, cellRow);
+  let yCell = document.getElementById(yCellId);
+  return yCell;
+}
+/** evaluate a selected row in the data table */
+let evalTableRow = function (currentRowNumber) {
+  let currentXCell = document.getElementById(composeCellId("x", currentRowNumber));
+  let currentXValue = currentXCell.value;
+  for (let currentColNumber = 0; currentColNumber < colNumber; currentColNumber++) {
+    updateEquation(currentColNumber);
+    let currentYCell = document.getElementById(composeCellId("y", currentColNumber, currentRowNumber));
+    if (currentXValue === "") {
+      currentYCell.value = "";
+    } else {
+      nerdamer.setVar(xVar, currentXValue);
+      let mode;
+      if (inFractions) {
+        mode = "fractions";
+      } else {
+        mode = "decimals";
+      }
+      let result = nerdamer(equation).evaluate().text(mode);
+      console.log("result: " + result);
+      currentYCell.value = result;
+    }
+  }
+}
+/** evaluate the whole data table*/
 let evalTable = function () {
   updateVariable();
-  updateEquation();
   for (let i = 0; i < rowNumber; i++) {
     evalTableRow(i);
   }
 }
 let updateVariable = function () {
-  let xHeaderCell = dataTable.querySelector("#x-header");
+  let xHeaderCell = document.getElementById("x-header");
   xVar = xHeaderCell.value;
 }
-let updateEquation = function () {
-  let yHeaderCell = dataTable.querySelector("#y-header");
+let updateEquation = function (cellCol) {
+  let yHeaderCell = document.getElementById(composeCellId("y", cellCol, "header"));
   equation = yHeaderCell.value;
 }
 let createTableHeader = function () {
@@ -198,7 +237,8 @@ let createTableHeader = function () {
   xCellHeader.setAttribute("spellcheck", false);
   let yCellHeader = document.createElement("input");
   yCellHeader.setAttribute("class", "tableCell");
-  yCellHeader.setAttribute("id", "y-header");
+  // the first (0th) y-header
+  yCellHeader.setAttribute("id", "y-0-header");
   yCellHeader.setAttribute("size", 10);
   yCellHeader.setAttribute("value", "2x");
   yCellHeader.setAttribute("spellcheck", false);
@@ -211,7 +251,7 @@ let createTableHeader = function () {
   dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
   // set up auto expansion for table header to accomodate long equations
-  autoScaleYHeader();
+  autoScaleYHeader(0); // 0 is the first y-header
   // create a fractions/decimals switch button
   // <span class="icon-fractions"></span>
   let fractionsBtn = document.createElement("button");
@@ -243,24 +283,26 @@ let createTableRow = function (focusCellId) {
   let xCell = document.createElement("input");
   xCell.setAttribute("class", "tableCell");
   xCell.setAttribute("size", 2);
-  xCell.setAttribute("id", "x-" + rowNumber);
+  xCell.setAttribute("id", composeCellId("x", rowNumber));
   xCell.setAttribute("spellcheck", false);
-  let yCell = document.createElement("input");
-  yCell.setAttribute("class", "tableCell");
-  yCell.setAttribute("size", 10);
-  yCell.setAttribute("id", "y-" + rowNumber);
-  yCell.setAttribute("spellcheck", false);
-  yCell.readOnly = true;
   dataTable.appendChild(xCell);
-  dataTable.appendChild(yCell);
+  for (let currentColNumber = 0; currentColNumber < colNumber; currentColNumber++) {
+    let yCell = document.createElement("input");
+    yCell.setAttribute("class", "tableCell");
+    yCell.setAttribute("size", 10);
+    yCell.setAttribute("id", composeCellId("y", currentColNumber, rowNumber));
+    yCell.setAttribute("spellcheck", false);
+    yCell.readOnly = true;
+    dataTable.appendChild(yCell);
+  }
   dataTable.appendChild(document.createElement("br")); //create a line break
   rowNumber++;
   console.log("focusCellId: " + focusCellId);
-  let focusCell = dataTable.querySelector("input#" + focusCellId);
+  let focusCell = document.getElementById(focusCellId);
   focusCell.focus();
 }
 let appendRow = function (cell) {
-  let focusCellId = cellColumn + "-" + (rowNumber + 1);
+  let focusCellId = composeCellId(getColumn(cell), getColNumber(cell), (rowNumber + 1));
   createTableRow(focusCellId);
 }
 let removeTableRow = function (cell) {
@@ -270,11 +312,14 @@ let removeTableRow = function (cell) {
   } else {
     // remove the whole row
     let xCell = getXCell(cellRow);
-    let yCell = getYCell(cellRow);
-    // remove newline break
-    let linebreak = yCell.nextSibling;
     xCell.remove();
-    yCell.remove();
+    let linebreak;
+    for (let currentColNumber = 0; currentColNumber < colNumber; currentColNumber++) {
+      let yCell = getYCell(currentColNumber, cellRow);
+      // remove newline break
+      linebreak = yCell.nextSibling; // only the last y-cell's next sibling will be preserved
+      yCell.remove();
+    }
     decrementRowNumbers(cellRow + 1);
     rowNumber--;
     if (linebreak.tagName.toUpperCase() === "BR") { // check if the element is a linebreak
