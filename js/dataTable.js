@@ -253,7 +253,14 @@ let createYHeader = function (cellCol = 0) {
   yCellHeader.addEventListener("input", function () {
     evalTable();
   });
-  dataTable.appendChild(yCellHeader);
+  if (cellCol > 0) {
+    let lastYHeader = document.getElementById(composeCellId("y", cellCol - 1, "header"));
+    insertAfter(lastYHeader, yCellHeader);
+    // delay incrementing of colNumber to appendTableColumn
+  } else {
+    let previousXHeader = document.getElementById(composeCellId("x", "header"));
+    insertAfter(previousXHeader, yCellHeader);
+  }
   // set up auto expansion for table header to accomodate long equations
   autoScaleYHeader(cellCol); // 0 is the first y-header
 }
@@ -262,6 +269,13 @@ let createTableHeader = function () {
   createXHeader();
 
   createYHeader();
+
+  // create an add column button
+  let addColumnBtn = document.createElement("button");
+  addColumnBtn.addEventListener("click", function () {
+    appendTableColumn();
+  });
+  dataTable.appendChild(addColumnBtn);
 
   // create a fractions/decimals switch button
   // <span class="icon-fractions"></span>
@@ -291,6 +305,34 @@ let createTableHeader = function () {
   createTableRow("x-0"); // create and focus on a new data row
 }
 
+let appendTableColumn = function () {
+  // first create column header
+  createYHeader(colNumber);
+
+  // append a new y-cell at the end of each row
+  for (let currentRowNumber = 0; currentRowNumber < rowNumber; currentRowNumber++) {
+    createYCell(colNumber, currentRowNumber);
+  }
+
+  colNumber++;
+}
+
+let createYCell = function (cellCol, cellRow) {
+  let yCell = document.createElement("input");
+  yCell.setAttribute("class", "tableCell");
+  yCell.setAttribute("size", 10);
+  yCell.setAttribute("spellcheck", false);
+  yCell.setAttribute("id", composeCellId("y", cellCol, cellRow));
+  yCell.readOnly = true;
+  if (cellCol === 0) {
+    let previousCell = document.getElementById(composeCellId("x", cellRow));
+    insertAfter(previousCell, yCell);
+  } else {
+    let previousCell = document.getElementById(composeCellId("y", cellCol - 1, cellRow));
+    insertAfter(previousCell, yCell);
+  }
+}
+
 let createTableRow = function (focusCellId) {
   let xCell = document.createElement("input");
   xCell.setAttribute("class", "tableCell");
@@ -299,13 +341,7 @@ let createTableRow = function (focusCellId) {
   xCell.setAttribute("spellcheck", false);
   dataTable.appendChild(xCell);
   for (let currentColNumber = 0; currentColNumber < colNumber; currentColNumber++) {
-    let yCell = document.createElement("input");
-    yCell.setAttribute("class", "tableCell");
-    yCell.setAttribute("size", 10);
-    yCell.setAttribute("id", composeCellId("y", currentColNumber, rowNumber));
-    yCell.setAttribute("spellcheck", false);
-    yCell.readOnly = true;
-    dataTable.appendChild(yCell);
+    createYCell(currentColNumber, rowNumber);
   }
   dataTable.appendChild(document.createElement("br")); //create a line break
   rowNumber++;
@@ -372,4 +408,11 @@ let getCoreHeight = function (element) {
   // Element width minus padding and border
   elementHeight = element.offsetHeight - paddingY - borderY;
   return elementHeight;
+}
+
+// insert a new element as the next sibling of the reference element
+// source: https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib with modification
+// author: karim79
+function insertAfter(referenceElement, newElement) {
+  referenceElement.parentNode.insertBefore(newElement, referenceElement.nextElementSibling);
 }
