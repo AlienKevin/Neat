@@ -171,9 +171,9 @@ b is column number
 */
 let composeCellId = function (cellCol, a, b) {
   if (cellCol === "x") {
-    if (a !== undefined && b === undefined){
+    if (a !== undefined && b === undefined) {
       return "x-" + a;
-    } else if (a === undefined && b !== undefined){
+    } else if (a === undefined && b !== undefined) {
       return "x-" + b;
     }
   } else if (cellCol === "y") {
@@ -228,30 +228,41 @@ let updateEquation = function (cellCol) {
   let yHeaderCell = document.getElementById(composeCellId("y", cellCol, "header"));
   equation = yHeaderCell.value;
 }
-let createTableHeader = function () {
+
+let createXHeader = function () {
   let xCellHeader = document.createElement("input");
   xCellHeader.setAttribute("class", "tableCell");
   xCellHeader.setAttribute("id", "x-header");
   xCellHeader.setAttribute("size", 2);
   xCellHeader.setAttribute("value", "x");
   xCellHeader.setAttribute("spellcheck", false);
-  let yCellHeader = document.createElement("input");
-  yCellHeader.setAttribute("class", "tableCell");
-  // the first (0th) y-header
-  yCellHeader.setAttribute("id", "y-0-header");
-  yCellHeader.setAttribute("size", 10);
-  yCellHeader.setAttribute("value", "2x");
-  yCellHeader.setAttribute("spellcheck", false);
   xCellHeader.addEventListener("input", function () {
     evalTable();
   });
+  dataTable.appendChild(xCellHeader);
+}
+
+let createYHeader = function (cellCol = 0) {
+  let yCellHeader = document.createElement("input");
+  yCellHeader.setAttribute("class", "tableCell");
+  // the first (0th) y-header
+  yCellHeader.setAttribute("id", composeCellId("y", cellCol, "header"));
+  yCellHeader.setAttribute("size", 10);
+  yCellHeader.setAttribute("value", "2x");
+  yCellHeader.setAttribute("spellcheck", false);
   yCellHeader.addEventListener("input", function () {
     evalTable();
   });
-  dataTable.appendChild(xCellHeader);
   dataTable.appendChild(yCellHeader);
   // set up auto expansion for table header to accomodate long equations
-  autoScaleYHeader(0); // 0 is the first y-header
+  autoScaleYHeader(cellCol); // 0 is the first y-header
+}
+
+let createTableHeader = function () {
+  createXHeader();
+
+  createYHeader();
+
   // create a fractions/decimals switch button
   // <span class="icon-fractions"></span>
   let fractionsBtn = document.createElement("button");
@@ -279,6 +290,7 @@ let createTableHeader = function () {
   dataTable.appendChild(document.createElement("br")); //create a line break
   createTableRow("x-0"); // create and focus on a new data row
 }
+
 let createTableRow = function (focusCellId) {
   let xCell = document.createElement("input");
   xCell.setAttribute("class", "tableCell");
