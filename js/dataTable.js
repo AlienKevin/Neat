@@ -271,7 +271,10 @@ let createTableHeader = function () {
   createYHeader();
 
   // create an add column button
-  let addColumnBtn = document.createElement("button");
+  let addColumnBtn = document.createElement("div");
+  addColumnBtn.className = "btn";
+  addColumnBtn.id = "addBtn";
+  addColumnBtn.innerHTML = "+";
   addColumnBtn.addEventListener("click", function () {
     appendTableColumn();
   });
@@ -294,11 +297,15 @@ let createTableHeader = function () {
   })
   dataTable.appendChild(fractionsBtn);
   // create a close button to delete the whole table
-  let closeBtn = document.createElement("span");
-  closeBtn.setAttribute("class", "close");
-  closeBtn.innerHTML = "x";
+  let closeBtn = document.createElement("div");
+  closeBtn.className = "btn";
+  closeBtn.id = "closeBtn";
+  closeBtn.innerHTML = "<span>x</span>";
   closeBtn.addEventListener("click", function () {
     clearElement(dataTable);
+    // reset row and column number
+    rowNumber = 0;
+    colNumber = 1;
   });
   dataTable.appendChild(closeBtn);
   dataTable.appendChild(document.createElement("br")); //create a line break
