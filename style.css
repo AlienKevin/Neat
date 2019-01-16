@@ -67,7 +67,7 @@ button#settingBtn {
   text-align: center;
 }
 
-#closeBtn span{
+#closeBtn span {
   position: relative;
   bottom: 3px;
 }
@@ -302,6 +302,38 @@ button#createFormulaBtn {
   padding: .2em;
   height: 1.4em;
 }
+
+/* Based on: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/radio#Styling_radio_inputs 
+************************Start of Styling radio buttons and labels***************************/
+.modal-body label {
+  margin-right: 15px;
+  line-height: 32px;
+}
+
+.modal-body div#copyOnDblClick input {
+  padding: 0;
+
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+
+  border: 2px solid #999;
+  transition: 0.2s all linear;
+  outline: none;
+
+  position: relative;
+  bottom: 2px;
+}
+
+.modal-body div#copyOnDblClick input:checked {
+  border: 6px solid black;
+}
+
+/****************************End of Styling radio buttons and labels******************/
 
 .modal-footer {
   /* padding: 2px 16px;

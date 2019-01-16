@@ -62,10 +62,12 @@ document.addEventListener("click", function (event) {
   for (let i = 0; i < inputNumber; i++) { // the number of outputs is equal to the number of inputs
     let currentOutput = document.getElementById(composeId("output", i));
     const rootBlock = currentOutput.querySelector("span.mq-root-block");
-    let selectionWrapper = rootBlock.querySelector("span.mq-selection");
-    if (selectionWrapper && rootBlock.childElementCount === OFFSET + 1) {
-      // rootBlock's elements are all selected, except the first "equal sign"
-      unwrap(selectionWrapper);
+    if (rootBlock) {
+      let selectionWrapper = rootBlock.querySelector("span.mq-selection");
+      if (selectionWrapper && rootBlock.childElementCount === OFFSET + 1) {
+        // rootBlock's elements are all selected, except the first "equal sign"
+        unwrap(selectionWrapper);
+      }
     }
   }
 });
