@@ -19,7 +19,7 @@ let convertToLaTeX = converToLaTexDefault;
 const displayInLaTeXDefault = true;
 let displayInLaTeX = displayInLaTeXDefault;
 // whether to copy on double click of output boxes or not
-const copyOnDoubleClick = true;
+const copyOnDoubleClick = false;
 //create initial input and output on page load
 document.addEventListener("DOMContentLoaded", function (event) {
   createNewField();
@@ -42,9 +42,16 @@ mathField.addEventListener("dblclick", function (event) {
         const selectionWrapper = document.createElement("span");
         selectionWrapper.classList.add("mq-selection");
         wrapAll(Array.from(rootBlock.childNodes).slice(OFFSET), selectionWrapper);
+        const outputMQ = outputMQs[i];
+        const result = outputMQ.latex().substring(OFFSET);
+        const textarea = rootBlock.querySelector("span.mq-textarea");
+        if (textarea) {
+          textarea.remove();
+        }
         if (copyOnDoubleClick) {
-          const outputMQ = outputMQs[i];
-          copyStringToClipboard(outputMQ.latex().substring(OFFSET));
+          copyStringToClipboard(result);
+        } else {
+          selectString(result);
         }
       }
     }
@@ -101,25 +108,41 @@ let unwrap = function (wrapper) {
 }
 
 /**
- * Source: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
+ * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
+ * Select a string, if user click copy (like on mobile devices) or
+ * press keyboard to copy (like ctrl-c for windows), set the clipboard content
+ * to the given string
+ * @param {String} str the string to select
+ */
+let selectString = function (str) {
+  let el = document.getElementById("copyBoard");
+  if (!el) {
+    // Create new element
+    el = document.createElement('textarea');
+    el.id = "copyBoard";
+    // Set non-editable to avoid focus and move outside of view
+    el.setAttribute('readonly', '');
+    el.style.cssText = "position: absolute; left: -9999px";
+    document.body.appendChild(el);
+  }
+  // Set value (string to be copied)
+  el.value = str;
+  // Select text inside element
+  el.select();
+  return el;
+}
+
+/**
+ * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
  * Copying strings to the clipboard using pure Javascript
  * @param {String} str the string to copy to clipboard
  */
-function copyStringToClipboard (str) {
-  // Create new element
-  var el = document.createElement('textarea');
-  // Set value (string to be copied)
-  el.value = str;
-  // Set non-editable to avoid focus and move outside of view
-  el.setAttribute('readonly', '');
-  el.style = {position: 'absolute', left: '-9999px'};
-  document.body.appendChild(el);
-  // Select text inside element
-  el.select();
+let copyStringToClipboard = function (str) {
+  let el = selectString(str);
   // Copy text to clipboard
   document.execCommand('copy');
   // Remove temporary element
-  document.body.removeChild(el);
+  el.remove();
 }
 
 //listen for keyboard events in the input box and update result display in output box
