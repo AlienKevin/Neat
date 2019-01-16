@@ -4,6 +4,8 @@ const MQ = MathQuill.getInterface(2);
 const mathField = document.querySelector("#mathField");
 // the enumerated number sequence of input, used to generate ids for input boxes
 let inputNumber = 0; // 0 means the first input (zero-based index)
+// an array of associated Mathquill API Objects of output boxes
+let outputMQs = [];
 // precision of the number of decimal places to retain
 let precision = 5;
 // maximum precision allowed
@@ -16,15 +18,115 @@ let convertToLaTeX = converToLaTexDefault;
 // display in LaTeX or not
 const displayInLaTeXDefault = true;
 let displayInLaTeX = displayInLaTeXDefault;
+// whether to copy on double click of output boxes or not
+const copyOnDoubleClick = true;
 //create initial input and output on page load
 document.addEventListener("DOMContentLoaded", function (event) {
   createNewField();
 })
 
+// listen for double click on output boxes to copy the content in them
+mathField.addEventListener("dblclick", function (event) {
+  // console.log("output dblclicked!");
+  let target = event.target;
+  const OFFSET = 1; // skip over the first "equal sign"
+  for (let i = 0; i < inputNumber; i++) { // the number of outputs is equal to the number of inputs
+    const currentOutput = document.getElementById(composeId("output", i));
+    if (currentOutput.contains(target)) { // target element inside the output
+      const rootBlock = currentOutput.querySelector("span.mq-root-block");
+      const selectionWrapper = rootBlock.querySelector("span.mq-selection");
+      if (selectionWrapper && rootBlock.childElementCount === OFFSET + 1) {
+        // rootBlock's elements are all selected, excep the first "equal sign"
+        // do nothing
+      } else {
+        const selectionWrapper = document.createElement("span");
+        selectionWrapper.classList.add("mq-selection");
+        wrapAll(Array.from(rootBlock.childNodes).slice(OFFSET), selectionWrapper);
+        if (copyOnDoubleClick) {
+          const outputMQ = outputMQs[i];
+          copyStringToClipboard(outputMQ.latex().substring(OFFSET));
+        }
+      }
+    }
+  }
+});
+document.addEventListener("click", function (event) {
+  const OFFSET = 1; // skip over the first "equal sign"
+  for (let i = 0; i < inputNumber; i++) { // the number of outputs is equal to the number of inputs
+    let currentOutput = document.getElementById(composeId("output", i));
+    const rootBlock = currentOutput.querySelector("span.mq-root-block");
+    let selectionWrapper = rootBlock.querySelector("span.mq-selection");
+    if (selectionWrapper && rootBlock.childElementCount === OFFSET + 1) {
+      // rootBlock's elements are all selected, except the first "equal sign"
+      unwrap(selectionWrapper);
+    }
+  }
+});
+
+// Source: https://stackoverflow.com/a/41391872/6798201
+// Wrap wrapper around nodes
+// Just pass a collection of nodes, and a wrapper element
+let wrapAll = function (nodes, wrapper) {
+  // Cache the current parent and previous sibling of the first node.
+  var parent = nodes[0].parentNode;
+  var previousSibling = nodes[0].previousSibling;
+
+  // Place each node in wrapper.
+  //  - If nodes is an array, we must increment the index we grab from 
+  //    after each loop.
+  //  - If nodes is a NodeList, each node is automatically removed from 
+  //    the NodeList when it is removed from its parent with appendChild.
+  for (var i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
+    wrapper.appendChild(nodes[i]);
+  }
+
+  // Place the wrapper just after the cached previousSibling,
+  // or if that is null, just before the first child.
+  var nextSibling = previousSibling ? previousSibling.nextSibling : parent.firstChild;
+  parent.insertBefore(wrapper, nextSibling);
+
+  return wrapper;
+}
+
+// Unwrap a wrapper by replacing it with its child nodes
+let unwrap = function (wrapper) {
+  // console.log("​unwrap -> wrapper.parent", wrapper.parentNode);
+  while (wrapper.childElementCount > 0) {
+    // console.log("​unwrap -> wrapper.childElementCount", wrapper.childElementCount);
+    // console.log("​unwrap -> wrapper", wrapper);
+    // console.log("​unwrap -> wrapper.childNodes[i]", wrapper.firstChild);
+    wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
+  }
+  wrapper.remove();
+}
+
+/**
+ * Source: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
+ * Copying strings to the clipboard using pure Javascript
+ * @param {String} str the string to copy to clipboard
+ */
+function copyStringToClipboard (str) {
+  // Create new element
+  var el = document.createElement('textarea');
+  // Set value (string to be copied)
+  el.value = str;
+  // Set non-editable to avoid focus and move outside of view
+  el.setAttribute('readonly', '');
+  el.style = {position: 'absolute', left: '-9999px'};
+  document.body.appendChild(el);
+  // Select text inside element
+  el.select();
+  // Copy text to clipboard
+  document.execCommand('copy');
+  // Remove temporary element
+  document.body.removeChild(el);
+}
+
 //listen for keyboard events in the input box and update result display in output box
 mathField.addEventListener("keyup", function (event) {
   //if key pressed is ENTER, UP Arrow, DOWN Arrow, return immediately
   if (event.keyCode === 13 || event.keyCode === 38 || event.keyCode === 40) {
+    console.log(document.getElementById("output-0"));
     return;
   }
   const currentInput = event.target;
@@ -86,7 +188,9 @@ let updateOutput = function (currentInput) {
       // console.log(output.getAttribute("id"));
       // beautify result display using MathQuill
       if (displayInLaTeX) {
-        MQ.StaticMath(output);
+        // mathquillify the output box and store the returned MQ API object in an array
+        const outputNumber = getNumber(output);
+        outputMQs[outputNumber] = MQ.StaticMath(output);
       }
     }
     displayInLaTeX = displayInLaTeXDefault;
@@ -164,6 +268,22 @@ let createNewOutput = function () {
   newOutput.setAttribute("id", "output-" + inputNumber);
   return newOutput;
 }
+/**
+ * Return the sequence number of an input or output box
+ */
+let getNumber = function (element) {
+  return element.id.substring(element.id.lastIndexOf("-") + 1);
+}
+
+/**
+ * 
+ * @param {String} type "output"/"input"
+ * @param {Number|String} number the sequence number
+ */
+let composeId = function (type, number) {
+  return type + "-" + number;
+}
+
 //create a new field with an input box and output box
 let createNewField = function () {
   const newInput = createNewInput();
