@@ -303,6 +303,11 @@ button#createFormulaBtn {
   height: 1.4em;
 }
 
+
+.modal-body div#copyOnDblClick{
+  margin-top: 10px;
+}
+
 /* Based on: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/radio#Styling_radio_inputs 
 ************************Start of Styling radio buttons and labels***************************/
 .modal-body label {
