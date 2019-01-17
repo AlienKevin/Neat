@@ -158,7 +158,7 @@ mathField.addEventListener("keyup", function (event) {
   updateOutput(currentInput);
 });
 let updateOutput = function (currentInput) {
-  const inputId = currentInput.getAttribute("id");
+  const inputId = currentInput.id;
   const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
   const output = mathField.querySelectorAll("span.output")[currentInputNumber];
   //if key pressed is BACKSPACE and current input box is empty, return immediately
@@ -325,8 +325,7 @@ let moveCaretToEnd = function (input) {
 // evaluate all input boxes
 let evaluateAll = function () {
   for (let i = 0; i < inputNumber; i++) {
-    let inputId = "#input-" + i;
-    let input = mathField.querySelector(inputId);
+    let input = document.getElementById(composeId("input", i));
     updateOutput(input);
   }
 }

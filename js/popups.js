@@ -12,23 +12,23 @@ for (let i = 0; i < popupIds.length; i++) {
   const span = modal.querySelector(".close");
 
   // When the user clicks the button, open the modal
-  btn.onclick = function(event) {
+  btn.onclick = function (event) {
     modal.style.display = "block";
   }
 
   // When the user clicks on <span> (x), close the modal
-  span.onclick = function() {
+  span.onclick = function () {
     closeWindow(modal);
   }
 
   // When the user clicks anywhere outside of the modal, close it
-  window.onclick = function(event) {
+  window.onclick = function (event) {
     if (event.target == modal) {
       closeWindow(modal);
     }
   }
 }
-let closeWindow = function(modal) { // hide the popup window
+let closeWindow = function (modal) { // hide the popup window
   modal.style.display = "none";
 }
 // setting window
@@ -39,36 +39,47 @@ const settingWindow = document.querySelector("#settingWindow");
 const precisionInput = settingWindow.querySelector("input[name=decimalPrecision]");
 precisionInput.value = precision;
 // select the default copy on double click option
-if (copyOnDoubleClick){
+if (copyOnDoubleClick) {
   settingWindow.querySelector("input#copyOnDblClickYes").checked = true;
-} else{
+} else {
   settingWindow.querySelector("input#copyOnDblClickNo").checked = true;
 }
 
 const saveSettingBtn = settingWindow.querySelector("button#saveSettingBtn");
-saveSettingBtn.addEventListener("click", function() {
+saveSettingBtn.addEventListener("click", function () {
   let inputs = settingWindow.querySelectorAll("div.modal-body input");
+  let isValid = true;
   for (let input of inputs) {
     switch (input.name) {
       case "decimalPrecision":
-        setPrecision(input.value, input);
+        isValid = setPrecision(input.value, input) && isValid;
         break;
       case "copyOnDblClick":
-        setCopyOnDblClick(input);
+        isValid = setCopyOnDblClick(input) && isValid;
         break;
     }
   }
+  if (isValid) {
+    showMessage("Settings saved!", saveSettingBtn);
+    window.setTimeout(function () {
+      removeOldMessage();
+      closeWindow(settingWindow);
+    }, 500);
+    // re-render all equations
+    evaluateAll();
+  }
 });
-let setCopyOnDblClick = function(input){
-  if (input.checked){
-    if (input.value === "yes"){
+let setCopyOnDblClick = function (input) {
+  if (input.checked) {
+    if (input.value === "yes") {
       copyOnDoubleClick = true;
-    } else{
+    } else {
       copyOnDoubleClick = false;
     }
   }
+  return true; // all selections are valid
 }
-let setPrecision = function(value, input) {
+let setPrecision = function (value, input) {
   if (value === "") {
     showMessage("Please input a number", input);
   } else {
@@ -77,20 +88,17 @@ let setPrecision = function(value, input) {
       // console.log("value: " + value);
       if (value >= 0 && value <= MAX_PRECISION) {
         precision = value;
-        showMessage("Settings saved!", saveSettingBtn);
-        window.setTimeout(function(){
-          removeOldMessage();
-          closeWindow(settingWindow);
-        }, 500);
+        return true; // value is valid
       } else {
         showMessage("Precision value is out of range, should be from 0 to " + MAX_PRECISION, input);
       }
-    } else{
+    } else {
       showMessage("Input should be a valid integer", input);
     }
   }
+  return false; // invalid value
 }
-let showMessage = function(message, place) {
+let showMessage = function (message, place) {
   removeOldMessage();
   let msg = document.createElement("span");
   msg.style.paddingLeft = "10px";
@@ -99,7 +107,7 @@ let showMessage = function(message, place) {
   place.parentNode.insertBefore(msg, place.nextSibling);
 }
 
-let removeOldMessage = function(){
+let removeOldMessage = function () {
   let oldMsg = document.querySelector("div.modal span.message");
   if (oldMsg !== null) {
     oldMsg.remove(); // remove old message
