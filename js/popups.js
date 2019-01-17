@@ -59,6 +59,8 @@ saveSettingBtn.addEventListener("click", function () {
         break;
     }
   }
+  isValid = setConstants() && isValid;
+	// console.log("​isValid", isValid);
   if (isValid) {
     showMessage("Settings saved!", saveSettingBtn);
     window.setTimeout(function () {
@@ -69,6 +71,46 @@ saveSettingBtn.addEventListener("click", function () {
     evaluateAll();
   }
 });
+let setConstants = function(){
+  const constantTable = settingWindow.querySelector("div#setConstants table");
+  let isValid = true;
+  for (let i = 1; i < constantTable.rows.length; i++) {// skip the first th
+    const row = constantTable.rows[i];
+		// console.log("​setConstants -> row", row);
+    const name = row.cells[0].firstElementChild.value;
+		// console.log("​setConstants -> row.cells[0]", row.cells[0]);
+		// console.log("​setConstants -> name", name);
+    const value = Number(row.cells[1].firstElementChild.value);
+		// console.log("​setConstants -> row.cells[1]", row.cells[1]);
+    // console.log("​setConstants -> value", value);
+    let isCurrentValid = setConstant(name, value);
+    if (!isCurrentValid) {
+      isValid = false;
+      
+      showMessage("name must be alphabetical", row.cells[0]);
+      showMessage("value must be numbers", row.cells[1]);
+    }
+  }
+  return isValid;
+}
+let isValidConstantName = function (name) {
+  return true;
+}
+let isValidConstantValue = function (value) {
+  return true;
+}
+let setConstant = function (name, value) {
+	// console.log("​setConstant -> name", name);
+	// console.log("​setConstant -> value", value);
+  try {
+    nerdamer.setConstant(name, value)
+  } catch (e) {
+		// console.log("​}catch -> e", e);
+    return false; // invalid inputs
+  }
+  console.log("constant is valid!");
+  return true; // valid inputs
+}
 let setCopyOnDblClick = function (input) {
   if (input.checked) {
     if (input.value === "yes") {

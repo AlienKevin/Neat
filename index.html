@@ -76,14 +76,34 @@
         <h2>Setting</h2>
       </div>
       <div class="modal-body">
-        <span>Number of decimal places: </span>
-        <input name="decimalPrecision" type="text" size="10">
+        <div id="setPrecision">
+          <span>Number of decimal places: </span>
+          <input name="decimalPrecision" type="text" size="10">
+        </div>
         <div id="copyOnDblClick">
           <span>Copy on double click on output: </span>
           <input id="copyOnDblClickYes" type="radio" name="copyOnDblClick" value="yes">
           <label for="copyOnDblClickYes">Yes</label>
           <input id="copyOnDblClickNo" type="radio" name="copyOnDblClick" value="no">
           <label for="copyOnDblClickNo">No</label>
+        </div>
+        <div id="setConstants">
+          <span>Set constants:</span>
+          <table>
+            <tr>
+              <td>Name</td>
+              <td>Value</td>
+            </tr>
+            <tr>
+              <td>
+                <input name="constantName1" type="text" size="10">
+              </td>
+              <td>
+                <input name="constantValue1" type="text" size="10">
+              </td>
+            </tr>
+          </table>
+
         </div>
       </div>
       <div class="modal-footer">
