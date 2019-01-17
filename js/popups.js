@@ -33,6 +33,18 @@ let closeWindow = function(modal) { // hide the popup window
 }
 // setting window
 const settingWindow = document.querySelector("#settingWindow");
+
+// initialize default values for settings
+// display the default precision
+const precisionInput = settingWindow.querySelector("input[name=decimalPrecision]");
+precisionInput.value = precision;
+// select the default copy on double click option
+if (copyOnDoubleClick){
+  settingWindow.querySelector("input#copyOnDblClickYes").checked = true;
+} else{
+  settingWindow.querySelector("input#copyOnDblClickNo").checked = true;
+}
+
 const saveSettingBtn = settingWindow.querySelector("button#saveSettingBtn");
 saveSettingBtn.addEventListener("click", function() {
   let inputs = settingWindow.querySelectorAll("div.modal-body input");
@@ -41,9 +53,21 @@ saveSettingBtn.addEventListener("click", function() {
       case "decimalPrecision":
         setPrecision(input.value, input);
         break;
+      case "copyOnDblClick":
+        setCopyOnDblClick(input);
+        break;
     }
   }
 });
+let setCopyOnDblClick = function(input){
+  if (input.checked){
+    if (input.value === "yes"){
+      copyOnDoubleClick = true;
+    } else{
+      copyOnDoubleClick = false;
+    }
+  }
+}
 let setPrecision = function(value, input) {
   if (value === "") {
     showMessage("Please input a number", input);

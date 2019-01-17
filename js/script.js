@@ -19,7 +19,7 @@ let convertToLaTeX = converToLaTexDefault;
 const displayInLaTeXDefault = true;
 let displayInLaTeX = displayInLaTeXDefault;
 // whether to copy on double click of output boxes or not
-const copyOnDoubleClick = false;
+let copyOnDoubleClick = false;
 //create initial input and output on page load
 document.addEventListener("DOMContentLoaded", function (event) {
   createNewField();
