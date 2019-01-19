@@ -125,7 +125,6 @@ button#settingBtn {
   /* source: https://www.desmos.com/calculator*/
   float: left;
   text-align: center;
-  display: inline-block;
   width: 50%;
   font-size: 80%;
   padding-top: 4px;

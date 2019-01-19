@@ -1,16 +1,19 @@
-//initialize MathQuill
+// initialize MathQuill
 const MQ = MathQuill.getInterface(2);
-//retrieve mathField which contains all input and output boxes
+// retrieve mathField which contains all input and output boxes
 const mathField = document.querySelector("#mathField");
 // the enumerated number sequence of input, used to generate ids for input boxes
 let inputNumber = 0; // 0 means the first input (zero-based index)
 // an array of associated Mathquill API Objects of output boxes
-let outputMQs = [];
+const outputMQs = [];
 // precision of the number of decimal places to retain
+// eslint-disable-next-line prefer-const
 let precision = 5;
 // maximum precision allowed
+// eslint-disable-next-line no-unused-vars
 const MAX_PRECISION = 12;
 // the number of digits required to convert the result to exponent form
+// eslint-disable-next-line no-unused-vars
 const EXPONENT_MIN = 9;
 // convert to LaTeX or not
 const converToLaTexDefault = true;
@@ -19,27 +22,149 @@ let convertToLaTeX = converToLaTexDefault;
 const displayInLaTeXDefault = true;
 let displayInLaTeX = displayInLaTeXDefault;
 // whether to copy on double click of output boxes or not
+// eslint-disable-next-line prefer-const
 let copyOnDoubleClick = false;
-//create initial input and output on page load
-document.addEventListener("DOMContentLoaded", function (event) {
-  createNewField();
-})
+
+// create a new input box
+const createNewInput = function () {
+  const newInput = document.createElement("input");
+  newInput.setAttribute("type", "text");
+  newInput.setAttribute("size", "30");
+  newInput.setAttribute("spellcheck", false);
+  newInput.setAttribute("class", "input");
+  newInput.setAttribute("id", `input-${inputNumber}`);
+  return newInput;
+};
+// create a new output box
+const createNewOutput = function () {
+  const newOutput = document.createElement("span");
+  newOutput.setAttribute("class", "output");
+  newOutput.setAttribute("id", `output-${inputNumber}`);
+  return newOutput;
+};
+/**
+ * Return the sequence number of an input or output box
+ */
+const getNumber = function (element) {
+  return Number(element.id.substring(element.id.lastIndexOf("-") + 1));
+};
+
+/**
+ *
+ * @param {String} type "output"/"input"
+ * @param {Number|String} number the sequence number
+ */
+const composeId = function (type, number) {
+  return `${type}-${number}`;
+};
+
+// create a new field with an input box and output box
+const createNewField = function () {
+  const newInput = createNewInput();
+  const newOutput = createNewOutput();
+  mathField.appendChild(newInput);
+  mathField.appendChild(newOutput);
+  newInput.focus();
+  inputNumber++;
+};
+// move caret to the end of input string
+const moveCaretToEnd = function (input) {
+  input.setSelectionRange(input.value.length, input.value.length);
+};
+
+// create initial input and output on page load
+document.addEventListener("DOMContentLoaded", () => createNewField());
+
+// Source: https://stackoverflow.com/a/41391872/6798201
+// Wrap wrapper around nodes
+// Just pass a collection of nodes, and a wrapper element
+const wrapAll = function (nodes, wrapper) {
+  // Cache the current parent and previous sibling of the first node.
+  const parent = nodes[0].parentNode;
+  const previousSibling = nodes[0].previousSibling;
+
+  // Place each node in wrapper.
+  //  - If nodes is an array, we must increment the index we grab from
+  //    after each loop.
+  //  - If nodes is a NodeList, each node is automatically removed from
+  //    the NodeList when it is removed from its parent with appendChild.
+  for (let i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
+    wrapper.appendChild(nodes[i]);
+  }
+
+  // Place the wrapper just after the cached previousSibling,
+  // or if that is null, just before the first child.
+  const nextSibling = previousSibling ? previousSibling.nextSibling : parent.firstChild;
+  parent.insertBefore(wrapper, nextSibling);
+
+  return wrapper;
+};
+
+// Unwrap a wrapper by replacing it with its child nodes
+const unwrap = function (wrapper) {
+  // console.log("​unwrap -> wrapper.parent", wrapper.parentNode);
+  while (wrapper.childElementCount > 0) {
+    // console.log("​unwrap -> wrapper.childElementCount", wrapper.childElementCount);
+    // console.log("​unwrap -> wrapper", wrapper);
+    // console.log("​unwrap -> wrapper.childNodes[i]", wrapper.firstChild);
+    wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
+  }
+  wrapper.remove();
+};
+
+/**
+ * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
+ * Select a string, if user click copy (like on mobile devices) or
+ * press keyboard to copy (like ctrl-c for windows), set the clipboard content
+ * to the given string
+ * @param {String} str the string to select
+ */
+const selectString = function (str) {
+  let el = document.getElementById("copyBoard");
+  if (!el) {
+    // Create new element
+    el = document.createElement('textarea');
+    el.id = "copyBoard";
+    // Set non-editable to avoid focus and move outside of view
+    el.setAttribute('readonly', '');
+    el.style.cssText = "position: absolute; left: -9999px";
+    document.body.appendChild(el);
+  }
+  // Set value (string to be copied)
+  el.value = str;
+  // Select text inside element
+  el.select();
+  return el;
+};
+
+/**
+ * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
+ * Copying strings to the clipboard using pure Javascript
+ * @param {String} str the string to copy to clipboard
+ */
+const copyStringToClipboard = function (str) {
+  const el = selectString(str);
+  // Copy text to clipboard
+  document.execCommand('copy');
+  // Remove temporary element
+  el.remove();
+};
 
 // listen for double click on output boxes to copy the content in them
-mathField.addEventListener("dblclick", function (event) {
+mathField.addEventListener("dblclick", (event) => {
   // console.log("output dblclicked!");
-  let target = event.target;
+  const target = event.target;
   const OFFSET = 1; // skip over the first "equal sign"
   for (let i = 0; i < inputNumber; i++) { // the number of outputs is equal to the number of inputs
     const currentOutput = document.getElementById(composeId("output", i));
     if (currentOutput.contains(target)) { // target element inside the output
       const rootBlock = currentOutput.querySelector("span.mq-root-block");
-      const selectionWrapper = rootBlock.querySelector("span.mq-selection");
+      let selectionWrapper = rootBlock.querySelector("span.mq-selection");
       if (selectionWrapper && rootBlock.childElementCount === OFFSET + 1) {
         // rootBlock's elements are all selected, excep the first "equal sign"
         // do nothing
       } else {
-        const selectionWrapper = document.createElement("span");
+        selectionWrapper = document.createElement("span");
         selectionWrapper.classList.add("mq-selection");
         wrapAll(Array.from(rootBlock.childNodes).slice(OFFSET), selectionWrapper);
         const outputMQ = outputMQs[i];
@@ -57,13 +182,13 @@ mathField.addEventListener("dblclick", function (event) {
     }
   }
 });
-document.addEventListener("click", function (event) {
+document.addEventListener("click", () => {
   const OFFSET = 1; // skip over the first "equal sign"
   for (let i = 0; i < inputNumber; i++) { // the number of outputs is equal to the number of inputs
-    let currentOutput = document.getElementById(composeId("output", i));
+    const currentOutput = document.getElementById(composeId("output", i));
     const rootBlock = currentOutput.querySelector("span.mq-root-block");
     if (rootBlock) {
-      let selectionWrapper = rootBlock.querySelector("span.mq-selection");
+      const selectionWrapper = rootBlock.querySelector("span.mq-selection");
       if (selectionWrapper && rootBlock.childElementCount === OFFSET + 1) {
         // rootBlock's elements are all selected, except the first "equal sign"
         unwrap(selectionWrapper);
@@ -72,270 +197,169 @@ document.addEventListener("click", function (event) {
   }
 });
 
-// Source: https://stackoverflow.com/a/41391872/6798201
-// Wrap wrapper around nodes
-// Just pass a collection of nodes, and a wrapper element
-let wrapAll = function (nodes, wrapper) {
-  // Cache the current parent and previous sibling of the first node.
-  var parent = nodes[0].parentNode;
-  var previousSibling = nodes[0].previousSibling;
-
-  // Place each node in wrapper.
-  //  - If nodes is an array, we must increment the index we grab from 
-  //    after each loop.
-  //  - If nodes is a NodeList, each node is automatically removed from 
-  //    the NodeList when it is removed from its parent with appendChild.
-  for (var i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
-    wrapper.appendChild(nodes[i]);
+// Error class for reporting calculation errors
+class Error {
+  constructor(message) {
+    this.message = message;
   }
-
-  // Place the wrapper just after the cached previousSibling,
-  // or if that is null, just before the first child.
-  var nextSibling = previousSibling ? previousSibling.nextSibling : parent.firstChild;
-  parent.insertBefore(wrapper, nextSibling);
-
-  return wrapper;
 }
-
-// Unwrap a wrapper by replacing it with its child nodes
-let unwrap = function (wrapper) {
-  // console.log("​unwrap -> wrapper.parent", wrapper.parentNode);
-  while (wrapper.childElementCount > 0) {
-    // console.log("​unwrap -> wrapper.childElementCount", wrapper.childElementCount);
-    // console.log("​unwrap -> wrapper", wrapper);
-    // console.log("​unwrap -> wrapper.childNodes[i]", wrapper.firstChild);
-    wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
-  }
-  wrapper.remove();
-}
-
-/**
- * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
- * Select a string, if user click copy (like on mobile devices) or
- * press keyboard to copy (like ctrl-c for windows), set the clipboard content
- * to the given string
- * @param {String} str the string to select
- */
-let selectString = function (str) {
-  let el = document.getElementById("copyBoard");
-  if (!el) {
-    // Create new element
-    el = document.createElement('textarea');
-    el.id = "copyBoard";
-    // Set non-editable to avoid focus and move outside of view
-    el.setAttribute('readonly', '');
-    el.style.cssText = "position: absolute; left: -9999px";
-    document.body.appendChild(el);
-  }
-  // Set value (string to be copied)
-  el.value = str;
-  // Select text inside element
-  el.select();
-  return el;
-}
-
-/**
- * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
- * Copying strings to the clipboard using pure Javascript
- * @param {String} str the string to copy to clipboard
- */
-let copyStringToClipboard = function (str) {
-  let el = selectString(str);
-  // Copy text to clipboard
-  document.execCommand('copy');
-  // Remove temporary element
-  el.remove();
-}
-
-//listen for keyboard events in the input box and update result display in output box
-mathField.addEventListener("keyup", function (event) {
-  //if key pressed is ENTER, UP Arrow, DOWN Arrow, return immediately
-  if (event.keyCode === 13 || event.keyCode === 38 || event.keyCode === 40) {
-    console.log(document.getElementById("output-0"));
-    return;
-  }
-  const currentInput = event.target;
-  updateOutput(currentInput);
-});
-let updateOutput = function (currentInput) {
-  const inputId = currentInput.id;
-  const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
-  const output = mathField.querySelectorAll("span.output")[currentInputNumber];
-  //if key pressed is BACKSPACE and current input box is empty, return immediately
-  if (event.keyCode === 8 && currentInput.value === "") {
-    output.innerHTML = "";
-    return;
-  }
-  if (mathField.querySelector("span#output-" + currentInputNumber) !== null) {
-    let result = evalExpr(currentInput);
-    if (result instanceof Error) { // an error object
-      console.log("error: ", result);
-      output.innerHTML = '<div id="errorIcon" class="material-icons" style="font-size: 40px; position: relative; top: 10px">warning</div>'; // warning symbol
-      let errorIcon = output.querySelector("div#errorIcon");
-      errorIcon.className += " not-selectable"; // set error icon to be not selectable
-      output.addEventListener("mousemove", function (event) {
-        let errorMsg = output.querySelector("div.errorMsg");
-        if (isHovered(errorIcon)) {
-          // console.log("errorMsg is hovered");
-          if (errorMsg === null) {
-            let newErrorMsg = document.createElement("div");
-            newErrorMsg.setAttribute("class", "errorMsg not-selectable");
-            newErrorMsg.innerHTML = result.message;
-            output.appendChild(newErrorMsg);
-          }
-        } else {
-          // console.log("errorMsg is not hovered");
-          if (errorMsg !== null) {
-            errorMsg.remove();
-          }
+const removeDuplicatedResults = function (result) {
+  console.log("removing duplicated results");
+  if (result instanceof Array) {
+    for (let i = 0; i < result.length; i++) {
+      const element = result[i];
+      for (let j = 0; j < i; j++) {
+        if (element.valueOf() === result[j].valueOf()) {
+          result.splice(i, 1);
+          i--;
         }
-      });
-    } else {
-      if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
-        console.log("result: " + result);
-        console.log("converting to LaTeX");
-        // console.log(result.text());
-        if (result.toTeX !== undefined) { // result is a nerdamer expression
-          result = result.toTeX("decimal"); // export LaTeX as decimals
-        } // else then result is string values like "undefined"
-        result = result.replace(/asin/g, "arcsin");
-        result = result.replace(/acos/g, "arccos");
-        result = result.replace(/atan/g, "arctan");
-        result = result.replace(/asec/g, "arcsec");
-        result = result.replace(/acsc/g, "arccsc");
-        result = result.replace(/acot/g, "arccot");
-        console.log("result: " + result);
-      }
-      result = convertToDecimals(result);
-      console.log("result: " + result);
-      output.innerHTML = " = " + result;
-      console.log(output.innerHTML);
-      // console.log(output.getAttribute("id"));
-      // beautify result display using MathQuill
-      if (displayInLaTeX) {
-        // mathquillify the output box and store the returned MQ API object in an array
-        const outputNumber = getNumber(output);
-        outputMQs[outputNumber] = MQ.StaticMath(output);
       }
     }
-    displayInLaTeX = displayInLaTeXDefault;
-    convertToLaTeX = converToLaTexDefault;
   }
-}
-// check if an element is hovered
-let isHovered = function (element) {
-  return element.matches(":hover");
-}
-//listen for keydown events of ENTER, UP arrow, and DOWN arrow keys to react immediately
-mathField.addEventListener("keydown", function (event) {
-  const currentInput = event.target;
-  const inputId = currentInput.getAttribute("id");
-  const currentInputNumber = Number(inputId.substring(inputId.length - 1)); //retrieve the last character
-  if (event.keyCode === 13) { //ENTER key is pressed
-    createNewField();
-  } else if (event.keyCode === 38) { //UP arrow key is pressed
-    event.preventDefault();
-    if (inputNumber > 0) {
-      let previousInput = mathField.querySelector("#input-" + (currentInputNumber - 1));
-      previousInput.focus();
-      moveCaretToEnd(previousInput);
+};
+const removeImagineryElements = function (symbol, result, index) {
+  console.log("symbol: ", symbol);
+  const elements = symbol.elements;
+  if (elements !== undefined) {
+    // remove imaginery results
+    console.log(`elements: ${elements}`);
+    console.log(`elements.length: ${elements.length}`);
+    for (let i = 0; i < elements.length; i++) {
+      console.log(`element.value: ${elements[i].value}`);
+      if (elements[i] !== undefined && elements[i].value.indexOf("i") >= 0) {
+        console.log(`imaginery element ${elements[i]}`);
+        elements.splice(i, 1);
+        i--;
+      }
     }
-  } else if (event.keyCode === 40) { //DOWN arrow key is pressed
-    event.preventDefault();
-    if (currentInputNumber < inputNumber - 1) {
-      let nextInput = mathField.querySelector("#input-" + (currentInputNumber + 1));
-      nextInput.focus();
-      moveCaretToEnd(nextInput);
-    } else {
-      createNewField();
+  } else if (symbol.value !== undefined) {
+    if (symbol.value.indexOf === undefined) { // values like Infinity
+      // do nothing
+    } else if (symbol.value.indexOf("i") >= 0) {
+      console.log("i found!");
+      if (result instanceof Array) { // prevent deleting result containing function names like "sin"
+        console.log("result is trimmed!");
+        result.splice(index, 1);
+        return true;
+      }
     }
-  } else if (event.keyCode === 8) { //BACKSPACE key is pressed
-    // input is empty and is NOT the first input box
-    if (currentInput.value === "" && currentInputNumber != 0) {
-      event.preventDefault(); // prevent BACKSPACE from deleting previous inputs
-      //remove current input box and associated output box
-      currentInput.remove();
-      const currentOutput = mathField.querySelector("#output-" + (currentInputNumber));
-      currentOutput.remove();
-      if (currentInputNumber + 1 < inputNumber) {
-        const nextInput = mathField.querySelector("#input-" + (currentInputNumber + 1));
-        nextInput.focus();
+  }
+  return false;
+};
+
+const removeImagineryResults = function (result) {
+  if (result instanceof Array) { // result is an array of Symbols
+    for (let i = 0; i < result.length; i++) {
+      console.log(`i: ${i}`);
+      console.log(`result: ${result}`);
+      const elementDeleted = removeImagineryElements(result[i], result, i);
+      if (elementDeleted) {
+        i--;
+      }
+    }
+  } else if (result.symbol !== undefined) {
+    // result is an Expression object with Symbol object embedded
+    removeImagineryElements(result.symbol, result);
+  }
+};
+
+const evaluateSymbols = function (array) {
+  console.log(`result.length: ${array.length}`);
+  for (let i = 0; i < array.length; i++) {
+    array[i] = nerdamer(array[i]).evaluate().symbol;
+    console.log(`resul[${i}]: ${array[i]}`);
+  }
+  console.log("results: ", array);
+};
+
+const formatArrayResults = function (result) {
+  let displayed = "{";
+  for (let i = 0; i < result.length; i++) {
+    displayed += `${result[i][0]} = ${result[i][1]}`;
+    if (i < result.length - 1) {
+      displayed += ",";
+    }
+  }
+  displayed += "}";
+  console.log(`displayed: ${displayed}`);
+  return displayed;
+};
+
+// handle solveEquations command
+const handleSolveEquations = function (expr) {
+  const equalsIndex = expr.indexOf("=");
+  const doubleEqualsIndex = expr.indexOf("==");
+  if (equalsIndex >= 0 && doubleEqualsIndex === -1) { // only matching single equal sign
+    console.log("solveEquations found!");
+    let paramList = [];
+    const openBraceIndex = expr.indexOf("{");
+    if (openBraceIndex >= 0) { // system of equations
+      console.log("system of equations found!");
+      const closeBraceIndex = expr.indexOf("}");
+      const params = expr.substring(openBraceIndex + 1, closeBraceIndex);
+      paramList[0] = params.split(",");
+      console.log(`paramList[0]: ${paramList[0]}`
+        instanceof Array);
+    } else { // single equation
+      const params = expr;
+      paramList = params.split(","); // split into expression and variable to solve for
+      if (paramList.length === 1) { // the variable to solve for is not defined
+        // pick the first variable parsed by nerdamer automatically
+        paramList[1] = nerdamer(params).variables()[0];
+      }
+    }
+    console.log(`paramList[0]: ${paramList[0]}`);
+    console.log(`paramList[1]: ${paramList[1]}`);
+    let result;
+    try {
+      if (paramList[1] !== undefined) {
+        result = nerdamer.solveEquations(paramList[0], paramList[1]);
+        evaluateSymbols(result);
+        console.log(`result: ${result}`);
       } else {
-        const previousInput = mathField.querySelector("#input-" + (currentInputNumber - 1));
-        previousInput.focus();
+        result = nerdamer.solveEquations(paramList[0]);
+        evaluateSymbols(result);
+        result = formatArrayResults(result);
       }
-      //reassign id for all subsequent input and output boxes
-      for (let i = currentInputNumber + 1; i < inputNumber; i++) {
-        const input = mathField.querySelector("#input-" + i);
-        input.setAttribute("id", "input-" + (i - 1));
-        const output = mathField.querySelector("#output-" + i);
-        output.setAttribute("id", "output-" + (i - 1));
-      }
-      //decrement total input number
-      inputNumber--;
+    } catch (e) { // handle error like attempting to solve non-linear system of equations
+      // console.log("error object: ", e);
+      // console.log("error object as string: " + e.toString());
+      result = new Error(e.message);
     }
+    displayInLaTeX = false;
+    convertToLaTeX = false;
+    return result;
   }
-});
-//create a new input box
-let createNewInput = function () {
-  const newInput = document.createElement("input");
-  newInput.setAttribute("type", "text");
-  newInput.setAttribute("size", "30");
-  newInput.setAttribute("spellcheck", false);
-  newInput.setAttribute("class", "input");
-  newInput.setAttribute("id", "input-" + inputNumber);
-  return newInput;
-}
-//create a new output box
-let createNewOutput = function () {
-  const newOutput = document.createElement("span");
-  newOutput.setAttribute("class", "output");
-  newOutput.setAttribute("id", "output-" + inputNumber);
-  return newOutput;
-}
-/**
- * Return the sequence number of an input or output box
- */
-let getNumber = function (element) {
-  return element.id.substring(element.id.lastIndexOf("-") + 1);
-}
+  return false;
+};
 
-/**
- * 
- * @param {String} type "output"/"input"
- * @param {Number|String} number the sequence number
- */
-let composeId = function (type, number) {
-  return type + "-" + number;
-}
-
-//create a new field with an input box and output box
-let createNewField = function () {
-  const newInput = createNewInput();
-  const newOutput = createNewOutput();
-  mathField.appendChild(newInput);
-  mathField.appendChild(newOutput);
-  newInput.focus();
-  inputNumber++;
-}
-//move caret to the end of input string
-let moveCaretToEnd = function (input) {
-  input.setSelectionRange(input.value.length, input.value.length);
-}
-// evaluate all input boxes
-let evaluateAll = function () {
-  for (let i = 0; i < inputNumber; i++) {
-    let input = document.getElementById(composeId("input", i));
-    updateOutput(input);
+const convertToDecimals = function (result) {
+  if (result instanceof Array) { // an array result
+    console.log("converting an array result to decimals");
+    for (let i = 0; i < result.length; i++) {
+      if (result[i] instanceof Array) {
+        for (let j = 0; j < result[i].length; j++) {
+          result[i][j] = nerdamer(result[i][j], undefined, "numer").text("decimals");
+        }
+      } else {
+        result[i] = nerdamer(result[i], undefined, "numer").text("decimals");
+      }
+    }
+    return result;
   }
-}
-//evaluate expression inside an input box
-let evalExpr = function (input) {
-  let tempVars = deleteVars();
+  if (typeof result === "object" && "text" in result) { // an expression result
+    return result.text("decimals");
+  } // a string result
+  console.log("converting a string result to decimals");
+  return result;
+};
+
+// evaluate expression inside an input box
+const evalExpr = function (input) {
   const expr = input.value;
-  console.log("expr: " + expr);
-  let result;
-  if ((result = handleSolveEquations(expr)) === false) {
+  console.log(`expr: ${expr}`);
+  let result = handleSolveEquations(expr);
+  if (result === false) {
     // let result = nerdamer.convertToLaTeX(nerdamer(expr).evaluate().text()).toString();
     // let result = nerdamer(expr).evaluate().text("decimal").toString();
     // let result = nerdamer(expr).evaluate().toTeX("decimal");
@@ -344,18 +368,19 @@ let evalExpr = function (input) {
       if (result.symbol !== undefined && result.symbol.value === "#") {
         console.log("result.symbol is valid");
         const decimalResult = Number(result.evaluate().text("decimals"));
-        if (isFinite(decimalResult)) { // result is a valid number, not Infinity or NaN
+        if (Number.isFinite(decimalResult)) { // result is a valid number, not Infinity or NaN
           console.log("result is a valid number");
           const exponentialResult = decimalResult.toExponential(precision);
           const significantFigures = decimalResult.toExponential().indexOf("e");
           const resultLength = decimalResult.toString().length;
           const exponent = exponentialResult.substring(exponentialResult.indexOf("e") + 1);
           if (exponent.charAt(0) === "-") { // negative exponent, a small decimal number
-            const exponentMagnitude = exponent.substring(1); // number in the exponent without +/- sign
+            // number in the exponent without +/- sign
+            const exponentMagnitude = exponent.substring(1);
             if (Number(exponentMagnitude) > precision) {
               result = exponentialResult; // return the result in form of exponential
             } else {
-              console.log("toFixed precision length: " + (precision + (resultLength - significantFigures)));
+              console.log(`toFixed precision length: ${precision + (resultLength - significantFigures)}`);
               result = decimalResult.toFixed(precision + (resultLength - significantFigures));
             }
           } else { // positive exponent
@@ -376,188 +401,173 @@ let evalExpr = function (input) {
   }
   removeImagineryResults(result);
   removeDuplicatedResults(result);
-  console.log("result after removing imagineries: " + result);
+  console.log(`result after removing imagineries: ${result}`);
   // convert fractions in result to decimals
   // result = result.text("decimal");
   // separate long result outputs into multiple lines
   if (result.length > 30) {
     result = result.replace(/,/g, ",<br>");
   }
-  console.log("result: " + result);
+  console.log(`result: ${result}`);
 
   return result;
-}
-// Error class for reporting calculation errors
-class Error {
-  constructor(message) {
-    this.message = message;
+};
+
+// check if an element is hovered
+const isHovered = function (element) {
+  return element.matches(":hover");
+};
+
+const updateOutput = function (currentInput, event) {
+  const currentInputNumber = getNumber(currentInput);
+  const output = mathField.querySelectorAll("span.output")[currentInputNumber];
+  // if key pressed is BACKSPACE and current input box is empty, return immediately
+  if (event !== undefined && event.keyCode === 8 && currentInput.value === "") {
+    output.innerHTML = "";
+    return;
   }
-}
-let deleteVars = function () {
-  let vars = nerdamer.getVars();
-  let tempVars = {};
-  for (let varName in vars) {
-    console.log("var: " + varName);
+  if (mathField.querySelector(`span#output-${currentInputNumber}`) !== null) {
+    let result = evalExpr(currentInput);
+    if (result instanceof Error) { // an error object
+      console.log("error: ", result);
+      output.innerHTML = '<div id="errorIcon" class="material-icons" style="font-size: 40px; position: relative; top: 10px">warning</div>'; // warning symbol
+      const errorIcon = output.querySelector("div#errorIcon");
+      errorIcon.className += " not-selectable"; // set error icon to be not selectable
+      output.addEventListener("mousemove", () => {
+        const errorMsg = output.querySelector("div.errorMsg");
+        if (isHovered(errorIcon)) {
+          // console.log("errorMsg is hovered");
+          if (errorMsg === null) {
+            const newErrorMsg = document.createElement("div");
+            newErrorMsg.setAttribute("class", "errorMsg not-selectable");
+            newErrorMsg.innerHTML = result.message;
+            output.appendChild(newErrorMsg);
+          }
+        } else if (errorMsg !== null) {
+          errorMsg.remove();
+        }
+      });
+    } else {
+      if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
+        console.log(`result: ${result}`);
+        console.log("converting to LaTeX");
+        // console.log(result.text());
+        if (result.toTeX !== undefined) { // result is a nerdamer expression
+          result = result.toTeX("decimal"); // export LaTeX as decimals
+        } // else then result is string values like "undefined"
+        result = result.replace(/asin/g, "arcsin");
+        result = result.replace(/acos/g, "arccos");
+        result = result.replace(/atan/g, "arctan");
+        result = result.replace(/asec/g, "arcsec");
+        result = result.replace(/acsc/g, "arccsc");
+        result = result.replace(/acot/g, "arccot");
+        console.log(`result: ${result}`);
+      }
+      result = convertToDecimals(result);
+      console.log(`result: ${result}`);
+      output.innerHTML = ` = ${result}`;
+      console.log(output.innerHTML);
+      // console.log(output.getAttribute("id"));
+      // beautify result display using MathQuill
+      if (displayInLaTeX) {
+        // mathquillify the output box and store the returned MQ API object in an array
+        const outputNumber = getNumber(output);
+        outputMQs[outputNumber] = MQ.StaticMath(output);
+      }
+    }
+    displayInLaTeX = displayInLaTeXDefault;
+    convertToLaTeX = converToLaTexDefault;
+  }
+};
+// listen for keyboard events in the input box and update result display in output box
+mathField.addEventListener("keyup", (event) => {
+  // if key pressed is ENTER, UP Arrow, DOWN Arrow, return immediately
+  if (event.keyCode === 13 || event.keyCode === 38 || event.keyCode === 40) {
+    console.log(document.getElementById("output-0"));
+    return;
+  }
+  const currentInput = event.target;
+  updateOutput(currentInput, event);
+});
+// listen for keydown events of ENTER, UP arrow, and DOWN arrow keys to react immediately
+mathField.addEventListener("keydown", (event) => {
+  const currentInput = event.target;
+  const currentInputNumber = getNumber(currentInput);
+  if (event.keyCode === 13) { // ENTER key is pressed
+    createNewField();
+  } else if (event.keyCode === 38) { // UP arrow key is pressed
+    event.preventDefault();
+    if (inputNumber > 0) {
+      const previousInput = mathField.querySelector(`#input-${currentInputNumber - 1}`);
+      previousInput.focus();
+      moveCaretToEnd(previousInput);
+    }
+  } else if (event.keyCode === 40) { // DOWN arrow key is pressed
+    event.preventDefault();
+    if (currentInputNumber < inputNumber - 1) {
+      const nextInput = mathField.querySelector(`#input-${currentInputNumber + 1}`);
+      nextInput.focus();
+      moveCaretToEnd(nextInput);
+    } else {
+      createNewField();
+    }
+  } else if (event.keyCode === 8) { // BACKSPACE key is pressed
+    // input is empty and is NOT the first input box
+    if (currentInput.value === "" && currentInputNumber !== 0) {
+      event.preventDefault(); // prevent BACKSPACE from deleting previous inputs
+      // remove current input box and associated output box
+      currentInput.remove();
+      const currentOutput = mathField.querySelector(`#output-${currentInputNumber}`);
+      currentOutput.remove();
+      if (currentInputNumber + 1 < inputNumber) {
+        const nextInput = mathField.querySelector(`#input-${currentInputNumber + 1}`);
+        nextInput.focus();
+      } else {
+        const previousInput = mathField.querySelector(`#input-${currentInputNumber - 1}`);
+        previousInput.focus();
+      }
+      // reassign id for all subsequent input and output boxes
+      for (let i = currentInputNumber + 1; i < inputNumber; i++) {
+        const input = mathField.querySelector(`#input-${i}`);
+        input.setAttribute("id", `input-${i - 1}`);
+        const output = mathField.querySelector(`#output-${i}`);
+        output.setAttribute("id", `output-${i - 1}`);
+      }
+      // decrement total input number
+      inputNumber--;
+    }
+  }
+});
+
+// evaluate all input boxes
+// eslint-disable-next-line no-unused-vars
+const evaluateAll = function () {
+  for (let i = 0; i < inputNumber; i++) {
+    const input = document.getElementById(composeId("input", i));
+    updateOutput(input);
+  }
+};
+
+// Unused functions
+
+// eslint-disable-next-line no-unused-vars
+const deleteVars = function () {
+  const vars = nerdamer.getVars();
+  const tempVars = {};
+  Object.keys(vars).forEach((varName) => {
+    console.log(`var: ${varName}`);
     tempVars[varName] = vars[varName];
-  }
+  });
   nerdamer.clearVars();
   return tempVars;
-}
-let removeDuplicatedResults = function (result) {
-  console.log("removing duplicated results");
-  if (result instanceof Array) {
-    for (let i = 0; i < result.length; i++) {
-      let element = result[i];
-      for (let j = 0; j < i; j++) {
-        if (element.valueOf() === result[j].valueOf()) {
-          result.splice(i, 1);
-          i--;
-        }
-      }
-    }
-  }
-}
-let removeImagineryResults = function (result) {
-  if (result instanceof Array) { // result is an array of Symbols
-    for (let i = 0; i < result.length; i++) {
-      console.log("i: " + i);
-      console.log("result: " + result);
-      let elementDeleted = removeImagineryElements(result[i], result, i);
-      if (elementDeleted) {
-        i--;
-      }
-    }
-  } else if (result.symbol !== undefined) { // result is an Expression object with Symbol object embedded
-    removeImagineryElements(result.symbol, result);
-  }
-}
-let removeImagineryElements = function (symbol, result, index) {
-  console.log("symbol: ", symbol);
-  let elements = symbol.elements;
-  if (elements !== undefined) {
-    //remove imaginery results
-    console.log("elements: " + elements);
-    console.log("elements.length: " + elements.length);
-    for (let i = 0; i < elements.length; i++) {
-      console.log("element.value: " + elements[i].value);
-      if (elements[i] !== undefined && elements[i].value.indexOf("i") >= 0) {
-        console.log("imaginery element " + elements[i]);
-        elements.splice(i, 1);
-        i--;
-      }
-    }
-  } else {
-    if (symbol.value !== undefined) {
-      if (symbol.value.indexOf === undefined) { // values like Infinity
-        // do nothing
-      } else if (symbol.value.indexOf("i") >= 0) {
-        console.log("i found!");
-        if (result instanceof Array) { // prevent deleting result containing function names like "sin"
-          console.log("result is trimmed!");
-          result.splice(index, 1);
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
-//handle solveEquations command
-let handleSolveEquations = function (expr) {
-  const equalsIndex = expr.indexOf("=");
-  const doubleEqualsIndex = expr.indexOf("==");
-  if (equalsIndex >= 0 && doubleEqualsIndex === -1) { // only matching single equal sign
-    console.log("solveEquations found!");
-    let paramList = [];
-    let openBraceIndex = expr.indexOf("{");
-    if (openBraceIndex >= 0) { // system of equations
-      console.log("system of equations found!");
-      let closeBraceIndex = expr.indexOf("}");
-      let params = expr.substring(openBraceIndex + 1, closeBraceIndex);
-      paramList[0] = params.split(",");
-      console.log("paramList[0]: " + paramList[0] instanceof Array);
-    } else { // single equation
-      let params = expr;
-      paramList = params.split(","); // split into expression and variable to solve for
-      if (paramList.length === 1) { // the variable to solve for is not defined
-        // pick the first variable parsed by nerdamer automatically
-        paramList[1] = nerdamer(params).variables()[0];
-      }
-    }
-    console.log("paramList[0]: " + paramList[0]);
-    console.log("paramList[1]: " + paramList[1]);
-    let result;
-    try {
-      if (paramList[1] !== undefined) {
-        result = nerdamer.solveEquations(paramList[0], paramList[1]);
-        evaluateSymbols(result);
-        console.log("result: " + result);
-      } else {
-        result = nerdamer.solveEquations(paramList[0]);
-        evaluateSymbols(result);
-        result = formatArrayResults(result);
-      }
-    } catch (e) { // handle error like attempting to solve non-linear system of equations
-      // console.log("error object: ", e);
-      // console.log("error object as string: " + e.toString());
-      result = new Error(e.message);
-    }
-    displayInLaTeX = false;
-    convertToLaTeX = false;
-    return result;
-  } else {
-    return false;
-  }
-}
+};
 
-let evaluateSymbols = function (array) {
-  console.log("result.length: " + array.length);
-  for (let i = 0; i < array.length; i++) {
-    array[i] = nerdamer(array[i]).evaluate().symbol;
-    console.log("resul[" + i + "]: " + array[i]);
-  }
-  console.log("results: ", array);
-}
-
-let formatArrayResults = function (result) {
-  let displayed = "{";
-  for (let i = 0; i < result.length; i++) {
-    displayed += result[i][0] + " = " + result[i][1];
-    if (i < result.length - 1) {
-      displayed += ",";
-    }
-  }
-  displayed += "}";
-  console.log("displayed: " + displayed);
-  return displayed;
-}
-
-let convertToDecimals = function (result) {
-  if (result instanceof Array) { //an array result
-    console.log("converting an array result to decimals");
-    for (let i = 0; i < result.length; i++) {
-      if (result[i] instanceof Array) {
-        for (let j = 0; j < result[i].length; j++) {
-          result[i][j] = nerdamer(result[i][j], undefined, "numer").text("decimals");
-        }
-      } else {
-        result[i] = nerdamer(result[i], undefined, "numer").text("decimals");
-      }
-    }
-    return result;
-  } else if (typeof result === "object" && "text" in result) { //an expression result
-    return result.text("decimals");
-  } else { // a string result
-    console.log("converting a string result to decimals");
-    return result;
-  }
-}
-
-//find matching parenthesis within a given string from the start index
-let findMatchingParen = function (string, start) {
-  let stack = [];
+// find matching parenthesis within a given string from the start index
+// eslint-disable-next-line no-unused-vars
+const findMatchingParen = function (string, start) {
+  const stack = [];
   for (let i = start; i < string.length; i++) {
-    let current = string.charAt(i);
+    const current = string.charAt(i);
     if (current === "(") {
       stack.push(1);
     } else if (current === ")") {
@@ -568,39 +578,4 @@ let findMatchingParen = function (string, start) {
     }
   }
   return -1;
-}
-
-// source: https://stackoverflow.com/questions/728360/how-do-i-correctly-clone-a-javascript-object
-function clone(obj) {
-  var copy;
-
-  // Handle the 3 simple types, and null or undefined
-  if (null == obj || "object" != typeof obj) return obj;
-
-  // Handle Date
-  if (obj instanceof Date) {
-    copy = new Date();
-    copy.setTime(obj.getTime());
-    return copy;
-  }
-
-  // Handle Array
-  if (obj instanceof Array) {
-    copy = [];
-    for (var i = 0, len = obj.length; i < len; i++) {
-      copy[i] = clone(obj[i]);
-    }
-    return copy;
-  }
-
-  // Handle Object
-  if (obj instanceof Object) {
-    copy = {};
-    for (var attr in obj) {
-      if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
-    }
-    return copy;
-  }
-
-  throw new Error("Unable to copy obj! Its type isn't supported.");
-}
+};

@@ -1,0 +1,22 @@
+{
+    "extends": "airbnb-base",
+    "env": {
+        "browser": true
+    },
+    "rules": {
+        "quotes": ["off", "double"],
+        "linebreak-style": ["off", "CRLF"],
+        "no-console": "off",
+        "func-names": "off",
+        "no-plusplus": "off",
+        "no-use-before-define": "error",
+        "prefer-destructuring": "off",
+        "no-irregular-whitespace": "off",
+        "indent": "off",
+        "no-param-reassign": ["error", { "props": false }]
+    },
+    "globals": {
+        "nerdamer": false,
+        "MathQuill": false
+    }
+}

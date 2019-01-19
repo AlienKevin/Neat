@@ -1,0 +1,6 @@
+{
+    "git.ignoreLimitWarning": true,
+    "eslint.options": {
+        "configFile": "C:/Users/Kevin Li/Desktop/Neat/.eslintrc.json"
+    }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "neat",
+  "version": "1.0.0",
+  "description": "A powerful and easy online calculator based on [Nerdamer](http://nerdamer.com/) and [MathQuill](http://mathquill.com/)\r Common features include:\r 1. Addition (+), subtraction (-), multiplication (*), division (/) on all real numbers\r 2. Exponentiation (^)\r 3. Constants like `pi`, `e`, etc.\r 4. Trig functions like `sin`, `cos`, `cot`, `sec`, `asin`,`acos`\r 3. Funcionts like `max`, `min`, `round`, `floor`, `ceil`,etc.\r 3. Modular (%)\r 4. Calculus functions like `diff` (differentiation), `integrate` (integration), `defint` (definite integration), `sum` (summation), `product` (production)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlienKevin/Neat.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlienKevin/Neat/issues"
+  },
+  "homepage": "https://github.com/AlienKevin/Neat#readme",
+  "devDependencies": {
+    "eslint": "^5.12.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0"
+  }
+}
