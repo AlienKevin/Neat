@@ -6,6 +6,8 @@ const mathField = document.querySelector("#mathField");
 let inputNumber = 0; // 0 means the first input (zero-based index)
 // an array of associated Mathquill API Objects of output boxes
 const outputMQs = [];
+// an array of assoicated Guppy API Objects of input boxes
+const guppies = [];
 // precision of the number of decimal places to retain
 // eslint-disable-next-line prefer-const
 let precision = 5;
@@ -77,7 +79,7 @@ document.addEventListener("click", () => {
 
 // evaluate expression inside an input box
 function evalExpr(input) {
-  const expr = input.value;
+  const expr = getValue(input);
   console.log(`expr: ${expr}`);
   let result = handleSolveEquations(expr);
   if (result === false) {
@@ -311,21 +313,35 @@ function evaluateAll() {
   }
 }
 
+function getValue(input) {
+  const guppy = getGuppy(input);
+  const text = guppy.engine.get_content("text");
+  return importFromText(text);
+}
+
+function getGuppy(input) {
+  return guppies[getNumber(input)];
+}
+
+function importFromText(text){
+  console.log("​importFromText -> text", text);
+}
+
 // create a new input box
 function createNewInput() {
-  const newInput = document.createElement("input");
+  const newInput = document.createElement("div");
   newInput.setAttribute("type", "text");
   newInput.setAttribute("size", "30");
   newInput.setAttribute("spellcheck", false);
   newInput.setAttribute("class", "input");
-  newInput.setAttribute("id", `input-${inputNumber}`);
+  newInput.setAttribute("id", composeId("input", inputNumber));
   return newInput;
 }
 // create a new output box
 function createNewOutput() {
   const newOutput = document.createElement("span");
   newOutput.setAttribute("class", "output");
-  newOutput.setAttribute("id", `output-${inputNumber}`);
+  newOutput.setAttribute("id", composeId("output", inputNumber));
   return newOutput;
 }
 /**
@@ -358,7 +374,7 @@ function createNewField() {
   const newOutput = createNewOutput();
   mathField.appendChild(newInput);
   mathField.appendChild(newOutput);
-  newInput.focus();
+  guppies[inputNumber] = new Guppy(newInput.id);
   inputNumber++;
 }
 // move caret to the end of input string
