@@ -20,6 +20,25 @@
     evaluateAll();
   });
 
+  // trig functions
+  trigs.forEach((trig) => {
+    nerdamer.replaceFunction(trig, (f, core) => function (x) {
+        if (isDegrees) {
+          return f(degSymbolToRadSymbol(x, core));
+        }
+        return f(x);
+      });
+  });
+  // inverse-trig functions
+  inverseTrigs.forEach((trig) => {
+    nerdamer.replaceFunction(trig, (f, core) => function (x) {
+        if (isDegrees) {
+          return radSymbolToDegSymbol(f(x), core);
+        }
+        return f(x);
+      });
+  });
+
   function radToDeg(rad) {
     const pi = Math.PI;
     const smallRad = rad % (2 * pi);
@@ -59,23 +78,4 @@
     }
     console.log("radToDeg successfully passed the test!");
   }
-
-  // trig functions
-  trigs.forEach((trig) => {
-    nerdamer.replaceFunction(trig, (f, core) => function (x) {
-        if (isDegrees) {
-          return f(degSymbolToRadSymbol(x, core));
-        }
-        return f(x);
-      });
-  });
-  // inverse-trig functions
-  inverseTrigs.forEach((trig) => {
-    nerdamer.replaceFunction(trig, (f, core) => function (x) {
-        if (isDegrees) {
-          return radSymbolToDegSymbol(f(x), core);
-        }
-        return f(x);
-      });
-  });
 }
