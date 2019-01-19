@@ -9,7 +9,7 @@
         "no-console": "off",
         "func-names": "off",
         "no-plusplus": "off",
-        "no-use-before-define": "error",
+        "no-use-before-define": "off",
         "prefer-destructuring": "off",
         "no-irregular-whitespace": "off",
         "indent": "off",

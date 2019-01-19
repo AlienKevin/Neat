@@ -8,29 +8,201 @@
   let equation = "2*x"; // default demo equation
   let inFractions = false; // default result is displayed in decimals
 
-  // clear all childrens of a given element
-  // by Gabriel McAdams on StackOverflow
-  function clearElement(element) {
-    while (element.firstChild) {
-      element.removeChild(element.firstChild);
+  /** evaluate a selected row in the data table */
+  function evalTableRow(currentRowNumber) {
+    const currentXCell = document.getElementById(composeCellId("x", currentRowNumber));
+    const currentXValue = currentXCell.value;
+    for (let currentColNumber = 0; currentColNumber < colNumber; currentColNumber++) {
+      updateEquation(currentColNumber);
+      const currentYCell = document.getElementById(composeCellId("y", currentColNumber, currentRowNumber));
+      if (currentXValue === "") {
+        currentYCell.value = "";
+      } else {
+        nerdamer.setVar(xVar, currentXValue);
+        let mode;
+        if (inFractions) {
+          mode = "fractions";
+        } else {
+          mode = "decimals";
+        }
+        const result = nerdamer(equation).evaluate().text(mode);
+        console.log(`result: ${result}`);
+        currentYCell.value = result;
+      }
     }
   }
 
-  function getCoreWidth(element) {
-    const cs = getComputedStyle(element);
-    const paddingX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-    const borderX = parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
-    // Element width minus padding and border
-    const elementWidth = element.offsetWidth - paddingX - borderX;
-    return elementWidth;
+  dataTable.addEventListener("keyup", (event) => {
+    const cell = event.target;
+    switch (event.keyCode) {
+      case 13: // ENTER key
+      case 38: // UP arrow key
+      case 40: // DOWN arrow key
+        // do nothing
+        break;
+      default:
+        /* beautify preserve:start */
+      { // all other keys
+        const cellId = event.target.getAttribute("id");
+        if (!cellId.endsWith("header")) { // table rows, not header
+          const currentRowNumber = getRowNumber(cell);
+          evalTableRow(currentRowNumber);
+        }
+      }
+        /* beautify preserve:end */
+    }
+  });
+
+  /** evaluate the whole data table */
+  function evalTable() {
+    updateVariable();
+    for (let i = 0; i < rowNumber; i++) {
+      evalTableRow(i);
+    }
   }
 
-  // insert a new element as the next sibling of the reference element
-  // source: https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib with modification
-  // author: karim79
-  function insertAfter(referenceElement, newElement) {
-    referenceElement.parentNode.insertBefore(newElement, referenceElement.nextElementSibling);
+  function updateVariable() {
+    const xHeaderCell = document.getElementById("x-header");
+    xVar = xHeaderCell.value;
   }
+
+  function updateEquation(cellCol) {
+    const yHeaderCell = document.getElementById(composeCellId("y", cellCol, "header"));
+    equation = yHeaderCell.value;
+  }
+
+  function createXHeader() {
+    const xCellHeader = document.createElement("input");
+    xCellHeader.setAttribute("class", "tableCell");
+    xCellHeader.setAttribute("id", "x-header");
+    xCellHeader.setAttribute("size", 2);
+    xCellHeader.setAttribute("value", "x");
+    xCellHeader.setAttribute("spellcheck", false);
+    xCellHeader.addEventListener("input", () => {
+      evalTable();
+    });
+    dataTable.appendChild(xCellHeader);
+  }
+
+  function createYHeader(cellCol = 0) {
+    const yCellHeader = document.createElement("input");
+    yCellHeader.setAttribute("class", "tableCell");
+    // the first (0th) y-header
+    yCellHeader.setAttribute("id", composeCellId("y", cellCol, "header"));
+    yCellHeader.setAttribute("size", 10);
+    yCellHeader.setAttribute("value", "2x");
+    yCellHeader.setAttribute("spellcheck", false);
+    yCellHeader.addEventListener("input", () => {
+      evalTable();
+    });
+    if (cellCol > 0) {
+      const lastYHeader = document.getElementById(composeCellId("y", cellCol - 1, "header"));
+      insertAfter(lastYHeader, yCellHeader);
+      // delay incrementing of colNumber to appendTableColumn
+    } else {
+      const previousXHeader = document.getElementById(composeCellId("x", "header"));
+      insertAfter(previousXHeader, yCellHeader);
+    }
+    // set up auto expansion for table header to accomodate long equations
+    autoScaleYHeader(cellCol); // 0 is the first y-header
+  }
+
+  function appendTableColumn() {
+    // first create column header
+    createYHeader(colNumber);
+
+    // append a new y-cell at the end of each row
+    for (let currentRowNumber = 0; currentRowNumber < rowNumber; currentRowNumber++) {
+      createYCell(colNumber, currentRowNumber);
+    }
+
+    colNumber++;
+  }
+
+  function createTableHeader() {
+    createXHeader();
+
+    createYHeader();
+
+    // create an add column button
+    const addColumnBtn = document.createElement("div");
+    addColumnBtn.className = "btn";
+    addColumnBtn.id = "addBtn";
+    addColumnBtn.innerHTML = "+";
+    addColumnBtn.addEventListener("click", () => {
+      appendTableColumn();
+    });
+    dataTable.appendChild(addColumnBtn);
+
+    // create a fractions/decimals switch button
+    // <span class="icon-fractions"></span>
+    const fractionsBtn = document.createElement("button");
+    fractionsBtn.setAttribute("class", "icon-fractions");
+    fractionsBtn.addEventListener("click", () => {
+      inFractions = !inFractions;
+      if (inFractions === true) {
+        fractionsBtn.classList.add("fractionsMode");
+        fractionsBtn.classList.remove("decimalsMode");
+      } else {
+        fractionsBtn.classList.add("decimalsMode");
+        fractionsBtn.classList.remove("fractionsMode");
+      }
+      evalTable();
+    });
+    dataTable.appendChild(fractionsBtn);
+    // create a close button to delete the whole table
+    const closeBtn = document.createElement("div");
+    closeBtn.className = "btn";
+    closeBtn.id = "closeBtn";
+    closeBtn.innerHTML = "<span>x</span>";
+    closeBtn.addEventListener("click", () => {
+      clearElement(dataTable);
+      // reset row and column number
+      rowNumber = 0;
+      colNumber = 1;
+    });
+    dataTable.appendChild(closeBtn);
+    dataTable.appendChild(document.createElement("br")); // create a line break
+    createTableRow("x-0"); // create and focus on a new data row
+  }
+
+  createTableBtn.addEventListener("click", () => {
+    console.log("initializing data table");
+    createTableHeader();
+  });
+  dataTable.addEventListener("keydown", (event) => {
+    const cell = event.target;
+    const cellColumn = getColumn(cell);
+    console.log('cellColumn', cellColumn);
+    const cellRow = getRowNumber(cell);
+    console.log('cellRow', cellRow);
+    switch (event.keyCode) {
+      case 13: // ENTER key
+        if (cellRow === rowNumber) { // last row
+          appendRow(cell);
+        } else {
+          gotoNextRow(cell);
+        }
+        break;
+      case 38: // UP arrow key
+        gotoPreviousRow(cell);
+        break;
+      case 40: // DOWN arrow key
+        gotoNextRow(cell);
+        break;
+      case 8:
+        /* beautify preserve:start */
+    { // BACKSPACE key
+      const cellContent = cell.value;
+      if (cellColumn === "x" && cellContent === "") {
+        gotoPreviousRow(cell);
+        removeTableRow(cell);
+      }
+      break;
+    }
+    /* beautify preserve:end */
+    }
+  });
   /**
    * Invalid cell position,
    * not in the format of "x-header" or "x-0" or "y-header-1" or "y-0-0"
@@ -266,200 +438,27 @@
       createTableRow(nextCellId);
     }
   }
-
-  function updateVariable() {
-    const xHeaderCell = document.getElementById("x-header");
-    xVar = xHeaderCell.value;
-  }
-
-  function updateEquation(cellCol) {
-    const yHeaderCell = document.getElementById(composeCellId("y", cellCol, "header"));
-    equation = yHeaderCell.value;
-  }
-
-  /** evaluate a selected row in the data table */
-  function evalTableRow(currentRowNumber) {
-    const currentXCell = document.getElementById(composeCellId("x", currentRowNumber));
-    const currentXValue = currentXCell.value;
-    for (let currentColNumber = 0; currentColNumber < colNumber; currentColNumber++) {
-      updateEquation(currentColNumber);
-      const currentYCell = document.getElementById(composeCellId("y", currentColNumber, currentRowNumber));
-      if (currentXValue === "") {
-        currentYCell.value = "";
-      } else {
-        nerdamer.setVar(xVar, currentXValue);
-        let mode;
-        if (inFractions) {
-          mode = "fractions";
-        } else {
-          mode = "decimals";
-        }
-        const result = nerdamer(equation).evaluate().text(mode);
-        console.log(`result: ${result}`);
-        currentYCell.value = result;
-      }
+  // clear all childrens of a given element
+  // by Gabriel McAdams on StackOverflow
+  function clearElement(element) {
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
     }
   }
 
-  dataTable.addEventListener("keyup", (event) => {
-    const cell = event.target;
-    switch (event.keyCode) {
-      case 13: // ENTER key
-      case 38: // UP arrow key
-      case 40: // DOWN arrow key
-        // do nothing
-        break;
-      default:
-        /* beautify preserve:start */
-      { // all other keys
-        const cellId = event.target.getAttribute("id");
-        if (!cellId.endsWith("header")) { // table rows, not header
-          const currentRowNumber = getRowNumber(cell);
-          evalTableRow(currentRowNumber);
-        }
-      }
-        /* beautify preserve:end */
-    }
-  });
-
-  /** evaluate the whole data table */
-  function evalTable() {
-    updateVariable();
-    for (let i = 0; i < rowNumber; i++) {
-      evalTableRow(i);
-    }
+  function getCoreWidth(element) {
+    const cs = getComputedStyle(element);
+    const paddingX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const borderX = parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
+    // Element width minus padding and border
+    const elementWidth = element.offsetWidth - paddingX - borderX;
+    return elementWidth;
   }
 
-  function createXHeader() {
-    const xCellHeader = document.createElement("input");
-    xCellHeader.setAttribute("class", "tableCell");
-    xCellHeader.setAttribute("id", "x-header");
-    xCellHeader.setAttribute("size", 2);
-    xCellHeader.setAttribute("value", "x");
-    xCellHeader.setAttribute("spellcheck", false);
-    xCellHeader.addEventListener("input", () => {
-      evalTable();
-    });
-    dataTable.appendChild(xCellHeader);
+  // insert a new element as the next sibling of the reference element
+  // source: https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib with modification
+  // author: karim79
+  function insertAfter(referenceElement, newElement) {
+    referenceElement.parentNode.insertBefore(newElement, referenceElement.nextElementSibling);
   }
-
-  function createYHeader(cellCol = 0) {
-    const yCellHeader = document.createElement("input");
-    yCellHeader.setAttribute("class", "tableCell");
-    // the first (0th) y-header
-    yCellHeader.setAttribute("id", composeCellId("y", cellCol, "header"));
-    yCellHeader.setAttribute("size", 10);
-    yCellHeader.setAttribute("value", "2x");
-    yCellHeader.setAttribute("spellcheck", false);
-    yCellHeader.addEventListener("input", () => {
-      evalTable();
-    });
-    if (cellCol > 0) {
-      const lastYHeader = document.getElementById(composeCellId("y", cellCol - 1, "header"));
-      insertAfter(lastYHeader, yCellHeader);
-      // delay incrementing of colNumber to appendTableColumn
-    } else {
-      const previousXHeader = document.getElementById(composeCellId("x", "header"));
-      insertAfter(previousXHeader, yCellHeader);
-    }
-    // set up auto expansion for table header to accomodate long equations
-    autoScaleYHeader(cellCol); // 0 is the first y-header
-  }
-
-  function appendTableColumn() {
-    // first create column header
-    createYHeader(colNumber);
-
-    // append a new y-cell at the end of each row
-    for (let currentRowNumber = 0; currentRowNumber < rowNumber; currentRowNumber++) {
-      createYCell(colNumber, currentRowNumber);
-    }
-
-    colNumber++;
-  }
-
-  function createTableHeader() {
-    createXHeader();
-
-    createYHeader();
-
-    // create an add column button
-    const addColumnBtn = document.createElement("div");
-    addColumnBtn.className = "btn";
-    addColumnBtn.id = "addBtn";
-    addColumnBtn.innerHTML = "+";
-    addColumnBtn.addEventListener("click", () => {
-      appendTableColumn();
-    });
-    dataTable.appendChild(addColumnBtn);
-
-    // create a fractions/decimals switch button
-    // <span class="icon-fractions"></span>
-    const fractionsBtn = document.createElement("button");
-    fractionsBtn.setAttribute("class", "icon-fractions");
-    fractionsBtn.addEventListener("click", () => {
-      inFractions = !inFractions;
-      if (inFractions === true) {
-        fractionsBtn.classList.add("fractionsMode");
-        fractionsBtn.classList.remove("decimalsMode");
-      } else {
-        fractionsBtn.classList.add("decimalsMode");
-        fractionsBtn.classList.remove("fractionsMode");
-      }
-      evalTable();
-    });
-    dataTable.appendChild(fractionsBtn);
-    // create a close button to delete the whole table
-    const closeBtn = document.createElement("div");
-    closeBtn.className = "btn";
-    closeBtn.id = "closeBtn";
-    closeBtn.innerHTML = "<span>x</span>";
-    closeBtn.addEventListener("click", () => {
-      clearElement(dataTable);
-      // reset row and column number
-      rowNumber = 0;
-      colNumber = 1;
-    });
-    dataTable.appendChild(closeBtn);
-    dataTable.appendChild(document.createElement("br")); // create a line break
-    createTableRow("x-0"); // create and focus on a new data row
-  }
-
-  createTableBtn.addEventListener("click", () => {
-    console.log("initializing data table");
-    createTableHeader();
-  });
-  dataTable.addEventListener("keydown", (event) => {
-    const cell = event.target;
-    const cellColumn = getColumn(cell);
-    console.log('cellColumn', cellColumn);
-    const cellRow = getRowNumber(cell);
-    console.log('cellRow', cellRow);
-    switch (event.keyCode) {
-      case 13: // ENTER key
-        if (cellRow === rowNumber) { // last row
-          appendRow(cell);
-        } else {
-          gotoNextRow(cell);
-        }
-        break;
-      case 38: // UP arrow key
-        gotoPreviousRow(cell);
-        break;
-      case 40: // DOWN arrow key
-        gotoNextRow(cell);
-        break;
-      case 8:
-        /* beautify preserve:start */
-    { // BACKSPACE key
-      const cellContent = cell.value;
-      if (cellColumn === "x" && cellContent === "") {
-        gotoPreviousRow(cell);
-        removeTableRow(cell);
-      }
-      break;
-    }
-    /* beautify preserve:end */
-    }
-  });
 }
