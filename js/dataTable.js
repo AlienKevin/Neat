@@ -10,20 +10,20 @@
 
   // clear all childrens of a given element
   // by Gabriel McAdams on StackOverflow
-  const clearElement = function (element) {
+  function clearElement(element) {
     while (element.firstChild) {
       element.removeChild(element.firstChild);
     }
-  };
+  }
 
-  const getCoreWidth = function (element) {
+  function getCoreWidth(element) {
     const cs = getComputedStyle(element);
     const paddingX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
     const borderX = parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
     // Element width minus padding and border
     const elementWidth = element.offsetWidth - paddingX - borderX;
     return elementWidth;
-  };
+  }
 
   // insert a new element as the next sibling of the reference element
   // source: https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib with modification
@@ -52,7 +52,7 @@
   @param {Number|String} a
   @param {Number|String} b
   */
-  const composeCellId = function (cellCol, a, b) {
+  function composeCellId(cellCol, a, b) {
     if (cellCol === "x") {
       if (a !== undefined && b === undefined) {
         return `x-${a}`;
@@ -64,59 +64,59 @@
       return `y-${a}-${b}`;
     }
     throw new InvalidCellPositionError(`Cell position of ${cellCol}, ${a}, ${b} is undefined`);
-  };
+  }
 
   /**
    * Get row number of a table cell
    * @param {Element} cell
    * @returns {number} the row number
    */
-  const getRowNumber = function (cell) {
+  function getRowNumber(cell) {
     const cellId = cell.getAttribute("id");
     const cellRowNumber = cellId.substring(cellId.lastIndexOf("-") + 1, cellId.length);
     if (cellRowNumber === "header") {
       return -1; // header's row number is -1, because 0 is the first non-header row
     }
     return Number(cellRowNumber); // other non-header rows have zero-based indexes
-  };
+  }
   /**
    * Get column name of a table cell
    * @param {Element} cell
    * @returns {string} "x", or "y"
    */
-  const getColumn = function (cell) {
+  function getColumn(cell) {
     const cellId = cell.getAttribute("id");
     return cellId.substring(0, cellId.indexOf("-"));
-  };
-  const getColNumber = function (cell) {
+  }
+  function getColNumber(cell) {
     if (getColumn(cell) === "y") { // only y cells have column numbers
       const cellId = cell.getAttribute("id");
       return Number(cellId.substring(cellId.indexOf("-") + 1, cellId.lastIndexOf("-")));
     }
     // x cells return undefined
     return undefined;
-  };
+  }
 
   /**
    * Get the element for x-cell given row number
    * @param {Number|String} cellRow row of the x-cell
    */
-  const getXCell = function (cellRow) {
+  function getXCell(cellRow) {
     const xCellId = composeCellId("x", cellRow);
     const xCell = document.getElementById(xCellId);
     return xCell;
-  };
+  }
   /**
    * Get the element for y-cell given row number and column number
    * @param {Number|String} cellCol column of the y-cell
    * @param {Number|String} cellRow row of the y-cell
    */
-  const getYCell = function (cellCol, cellRow) {
+  function getYCell(cellCol, cellRow) {
     const yCellId = composeCellId("y", cellCol, cellRow);
     const yCell = document.getElementById(yCellId);
     return yCell;
-  };
-  const createYCell = function (cellCol, cellRow) {
+  }
+  function createYCell(cellCol, cellRow) {
     const yCell = document.createElement("input");
     yCell.setAttribute("class", "tableCell");
     yCell.setAttribute("size", 10);
@@ -130,9 +130,9 @@
       const previousCell = document.getElementById(composeCellId("y", cellCol - 1, cellRow));
       insertAfter(previousCell, yCell);
     }
-  };
+  }
 
-  const createTableRow = function (focusCellId) {
+  function createTableRow(focusCellId) {
     const xCell = document.createElement("input");
     xCell.setAttribute("class", "tableCell");
     xCell.setAttribute("size", 2);
@@ -147,12 +147,12 @@
     console.log(`focusCellId: ${focusCellId}`);
     const focusCell = document.getElementById(focusCellId);
     focusCell.focus();
-  };
-  const appendRow = function (cell) {
+  }
+  function appendRow(cell) {
     const focusCellId = composeCellId(getColumn(cell), getColNumber(cell), (rowNumber + 1));
     createTableRow(focusCellId);
-  };
-  const decrementRowNumbers = function (cellRow) {
+  }
+  function decrementRowNumbers(cellRow) {
     console.log(`cellRow: ${cellRow}`);
     for (let i = cellRow; i < rowNumber; i++) {
       const xCell = getXCell(i);
@@ -161,8 +161,8 @@
       xCell.setAttribute("id", `x-${newRowNumber}`);
       yCell.setAttribute("id", `y-${newRowNumber}`);
     }
-  };
-  const removeTableRow = function (cell) {
+  }
+  function removeTableRow(cell) {
     const cellRow = getRowNumber(cell);
     if (cellRow === -1) { // header row
       // can't remove header row
@@ -183,10 +183,10 @@
         linebreak.remove();
       }
     }
-  };
+  }
   // automatically scale input box to fit long inputs
   // source: https://stackoverflow.com/questions/7168727/make-html-text-input-field-grow-as-i-type by Paulpro with modifications
-  const autoScaleInput = function (input, min, max, padRight) {
+  function autoScaleInput(input, min, max, padRight) {
     if (input !== null) {
       // eslint-disable-next-line no-param-reassign
       input.style.width = `${min}px`;
@@ -222,9 +222,9 @@
         }, 1);
       });
     }
-  };
+  }
   /** automatically extend y-header to accomodate longer equations */
-  const autoScaleYHeader = function (cellCol) {
+  function autoScaleYHeader(cellCol) {
     const yHeader = document.getElementById(composeCellId("y", cellCol, "header"));
     const vw = document.documentElement.clientWidth; // get the width of the screen
     const headerWidth = getCoreWidth(yHeader); // get the original styled width
@@ -236,8 +236,8 @@
 
     const padRight = 0;
     autoScaleInput(yHeader, min, max, padRight);
-  };
-  const gotoPreviousRow = function (cell) {
+  }
+  function gotoPreviousRow(cell) {
     const currentRowNumber = getRowNumber(cell);
     const currentColumn = getColumn(cell);
     const currentColNumber = getColNumber(cell);
@@ -252,8 +252,8 @@
     // console.log("previousCellId: " + previousCellId);
     const previousCell = document.getElementById(previousCellId);
     previousCell.focus();
-  };
-  const gotoNextRow = function (cell) {
+  }
+  function gotoNextRow(cell) {
     const currentRowNumber = getRowNumber(cell);
     const currentColumn = getColumn(cell);
     const currentColNumber = getColNumber(cell);
@@ -265,20 +265,20 @@
     } else { // next cell doesn't exist
       createTableRow(nextCellId);
     }
-  };
+  }
 
-  const updateVariable = function () {
+  function updateVariable() {
     const xHeaderCell = document.getElementById("x-header");
     xVar = xHeaderCell.value;
-  };
+  }
 
-  const updateEquation = function (cellCol) {
+  function updateEquation(cellCol) {
     const yHeaderCell = document.getElementById(composeCellId("y", cellCol, "header"));
     equation = yHeaderCell.value;
-  };
+  }
 
   /** evaluate a selected row in the data table */
-  const evalTableRow = function (currentRowNumber) {
+  function evalTableRow(currentRowNumber) {
     const currentXCell = document.getElementById(composeCellId("x", currentRowNumber));
     const currentXValue = currentXCell.value;
     for (let currentColNumber = 0; currentColNumber < colNumber; currentColNumber++) {
@@ -299,7 +299,7 @@
         currentYCell.value = result;
       }
     }
-  };
+  }
 
   dataTable.addEventListener("keyup", (event) => {
     const cell = event.target;
@@ -323,14 +323,14 @@
   });
 
   /** evaluate the whole data table */
-  const evalTable = function () {
+  function evalTable() {
     updateVariable();
     for (let i = 0; i < rowNumber; i++) {
       evalTableRow(i);
     }
-  };
+  }
 
-  const createXHeader = function () {
+  function createXHeader() {
     const xCellHeader = document.createElement("input");
     xCellHeader.setAttribute("class", "tableCell");
     xCellHeader.setAttribute("id", "x-header");
@@ -341,9 +341,9 @@
       evalTable();
     });
     dataTable.appendChild(xCellHeader);
-  };
+  }
 
-  const createYHeader = function (cellCol = 0) {
+  function createYHeader(cellCol = 0) {
     const yCellHeader = document.createElement("input");
     yCellHeader.setAttribute("class", "tableCell");
     // the first (0th) y-header
@@ -364,9 +364,9 @@
     }
     // set up auto expansion for table header to accomodate long equations
     autoScaleYHeader(cellCol); // 0 is the first y-header
-  };
+  }
 
-  const appendTableColumn = function () {
+  function appendTableColumn() {
     // first create column header
     createYHeader(colNumber);
 
@@ -376,9 +376,9 @@
     }
 
     colNumber++;
-  };
+  }
 
-  const createTableHeader = function () {
+  function createTableHeader() {
     createXHeader();
 
     createYHeader();
@@ -423,7 +423,7 @@
     dataTable.appendChild(closeBtn);
     dataTable.appendChild(document.createElement("br")); // create a line break
     createTableRow("x-0"); // create and focus on a new data row
-  };
+  }
 
   createTableBtn.addEventListener("click", () => {
     console.log("initializing data table");

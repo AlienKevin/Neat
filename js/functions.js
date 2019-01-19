@@ -4,7 +4,7 @@
   let isDegrees = false; // default to radians
   const trigs = ['sin', 'cos', 'tan', 'csc', 'sec', 'cot'];
   const inverseTrigs = ['asin', 'acos', 'atan', 'acsc', 'asec', 'acot'];
-  const switchToggle = function () {
+  function switchToggle() {
     const cover = degRadToggle.querySelector(".toggle-cover");
     if (cover.getAttribute("class").indexOf("toggle-cover-right") >= 0) { // in radians, change to degrees
       cover.setAttribute("class", "toggle-cover toggle-cover-left");
@@ -12,7 +12,7 @@
       cover.setAttribute("class", "toggle-cover toggle-cover-right");
     }
     isDegrees = !isDegrees; // flip the isDegrees setting
-  };
+  }
   // register listener for degrees/radians toggle button
   degRadToggle.addEventListener("click", () => {
     switchToggle();
@@ -20,7 +20,7 @@
     evaluateAll();
   });
 
-  const radToDeg = function (rad) {
+  function radToDeg(rad) {
     const pi = Math.PI;
     const smallRad = rad % (2 * pi);
     const deg = smallRad / (pi) * 180;
@@ -30,23 +30,23 @@
       return Math.round(deg);
     }
       return deg;
-  };
-  const radSymbolToDegSymbol = function (radSymbol, core) {
+  }
+  function radSymbolToDegSymbol(radSymbol, core) {
     const rad = radSymbol.valueOf();
     const deg = radToDeg(rad);
     return new core.Symbol(deg);
-  };
-  const degToRad = function (deg) {
+  }
+  function degToRad(deg) {
     const pi = Math.PI;
     return deg / 180 * pi;
-  };
-  const degSymbolToRadSymbol = function (degSymbol, core) {
+  }
+  function degSymbolToRadSymbol(degSymbol, core) {
     const deg = degSymbol.valueOf();
     const rad = degToRad(deg);
     return new core.Symbol(rad);
-  };
+  }
   // eslint-disable-next-line no-unused-vars
-  const testRadToDeg = function () {
+  function testRadToDeg() {
     for (let i = 0; i < 1e9; i++) {
       const deg = radToDeg(i * Math.PI);
       if (i % 2 === 0) { // even
@@ -58,7 +58,7 @@
         }
     }
     console.log("radToDeg successfully passed the test!");
-  };
+  }
 
   // trig functions
   trigs.forEach((trig) => {

@@ -26,7 +26,7 @@ let displayInLaTeX = displayInLaTeXDefault;
 let copyOnDoubleClick = false;
 
 // create a new input box
-const createNewInput = function () {
+function createNewInput() {
   const newInput = document.createElement("input");
   newInput.setAttribute("type", "text");
   newInput.setAttribute("size", "30");
@@ -34,43 +34,43 @@ const createNewInput = function () {
   newInput.setAttribute("class", "input");
   newInput.setAttribute("id", `input-${inputNumber}`);
   return newInput;
-};
+}
 // create a new output box
-const createNewOutput = function () {
+function createNewOutput() {
   const newOutput = document.createElement("span");
   newOutput.setAttribute("class", "output");
   newOutput.setAttribute("id", `output-${inputNumber}`);
   return newOutput;
-};
+}
 /**
  * Return the sequence number of an input or output box
  */
-const getNumber = function (element) {
+function getNumber(element) {
   return Number(element.id.substring(element.id.lastIndexOf("-") + 1));
-};
+}
 
 /**
  *
  * @param {String} type "output"/"input"
  * @param {Number|String} number the sequence number
  */
-const composeId = function (type, number) {
+function composeId(type, number) {
   return `${type}-${number}`;
-};
+}
 
 // create a new field with an input box and output box
-const createNewField = function () {
+function createNewField() {
   const newInput = createNewInput();
   const newOutput = createNewOutput();
   mathField.appendChild(newInput);
   mathField.appendChild(newOutput);
   newInput.focus();
   inputNumber++;
-};
+}
 // move caret to the end of input string
-const moveCaretToEnd = function (input) {
+function moveCaretToEnd(input) {
   input.setSelectionRange(input.value.length, input.value.length);
-};
+}
 
 // create initial input and output on page load
 document.addEventListener("DOMContentLoaded", () => createNewField());
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => createNewField());
 // Source: https://stackoverflow.com/a/41391872/6798201
 // Wrap wrapper around nodes
 // Just pass a collection of nodes, and a wrapper element
-const wrapAll = function (nodes, wrapper) {
+function wrapAll(nodes, wrapper) {
   // Cache the current parent and previous sibling of the first node.
   const parent = nodes[0].parentNode;
   const previousSibling = nodes[0].previousSibling;
@@ -98,10 +98,10 @@ const wrapAll = function (nodes, wrapper) {
   parent.insertBefore(wrapper, nextSibling);
 
   return wrapper;
-};
+}
 
 // Unwrap a wrapper by replacing it with its child nodes
-const unwrap = function (wrapper) {
+function unwrap(wrapper) {
   // console.log("​unwrap -> wrapper.parent", wrapper.parentNode);
   while (wrapper.childElementCount > 0) {
     // console.log("​unwrap -> wrapper.childElementCount", wrapper.childElementCount);
@@ -110,7 +110,7 @@ const unwrap = function (wrapper) {
     wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
   }
   wrapper.remove();
-};
+}
 
 /**
  * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
@@ -119,7 +119,7 @@ const unwrap = function (wrapper) {
  * to the given string
  * @param {String} str the string to select
  */
-const selectString = function (str) {
+function selectString(str) {
   let el = document.getElementById("copyBoard");
   if (!el) {
     // Create new element
@@ -135,20 +135,20 @@ const selectString = function (str) {
   // Select text inside element
   el.select();
   return el;
-};
+}
 
 /**
  * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
  * Copying strings to the clipboard using pure Javascript
  * @param {String} str the string to copy to clipboard
  */
-const copyStringToClipboard = function (str) {
+function copyStringToClipboard(str) {
   const el = selectString(str);
   // Copy text to clipboard
   document.execCommand('copy');
   // Remove temporary element
   el.remove();
-};
+}
 
 // listen for double click on output boxes to copy the content in them
 mathField.addEventListener("dblclick", (event) => {
@@ -203,7 +203,7 @@ class Error {
     this.message = message;
   }
 }
-const removeDuplicatedResults = function (result) {
+function removeDuplicatedResults(result) {
   console.log("removing duplicated results");
   if (result instanceof Array) {
     for (let i = 0; i < result.length; i++) {
@@ -216,8 +216,8 @@ const removeDuplicatedResults = function (result) {
       }
     }
   }
-};
-const removeImagineryElements = function (symbol, result, index) {
+}
+function removeImagineryElements(symbol, result, index) {
   console.log("symbol: ", symbol);
   const elements = symbol.elements;
   if (elements !== undefined) {
@@ -245,9 +245,9 @@ const removeImagineryElements = function (symbol, result, index) {
     }
   }
   return false;
-};
+}
 
-const removeImagineryResults = function (result) {
+function removeImagineryResults(result) {
   if (result instanceof Array) { // result is an array of Symbols
     for (let i = 0; i < result.length; i++) {
       console.log(`i: ${i}`);
@@ -261,18 +261,18 @@ const removeImagineryResults = function (result) {
     // result is an Expression object with Symbol object embedded
     removeImagineryElements(result.symbol, result);
   }
-};
+}
 
-const evaluateSymbols = function (array) {
+function evaluateSymbols(array) {
   console.log(`result.length: ${array.length}`);
   for (let i = 0; i < array.length; i++) {
     array[i] = nerdamer(array[i]).evaluate().symbol;
     console.log(`resul[${i}]: ${array[i]}`);
   }
   console.log("results: ", array);
-};
+}
 
-const formatArrayResults = function (result) {
+function formatArrayResults(result) {
   let displayed = "{";
   for (let i = 0; i < result.length; i++) {
     displayed += `${result[i][0]} = ${result[i][1]}`;
@@ -283,10 +283,10 @@ const formatArrayResults = function (result) {
   displayed += "}";
   console.log(`displayed: ${displayed}`);
   return displayed;
-};
+}
 
 // handle solveEquations command
-const handleSolveEquations = function (expr) {
+function handleSolveEquations(expr) {
   const equalsIndex = expr.indexOf("=");
   const doubleEqualsIndex = expr.indexOf("==");
   if (equalsIndex >= 0 && doubleEqualsIndex === -1) { // only matching single equal sign
@@ -331,9 +331,9 @@ const handleSolveEquations = function (expr) {
     return result;
   }
   return false;
-};
+}
 
-const convertToDecimals = function (result) {
+function convertToDecimals(result) {
   if (result instanceof Array) { // an array result
     console.log("converting an array result to decimals");
     for (let i = 0; i < result.length; i++) {
@@ -352,10 +352,10 @@ const convertToDecimals = function (result) {
   } // a string result
   console.log("converting a string result to decimals");
   return result;
-};
+}
 
 // evaluate expression inside an input box
-const evalExpr = function (input) {
+function evalExpr(input) {
   const expr = input.value;
   console.log(`expr: ${expr}`);
   let result = handleSolveEquations(expr);
@@ -411,14 +411,14 @@ const evalExpr = function (input) {
   console.log(`result: ${result}`);
 
   return result;
-};
+}
 
 // check if an element is hovered
-const isHovered = function (element) {
+function isHovered(element) {
   return element.matches(":hover");
-};
+}
 
-const updateOutput = function (currentInput, event) {
+function updateOutput(currentInput, event) {
   const currentInputNumber = getNumber(currentInput);
   const output = mathField.querySelectorAll("span.output")[currentInputNumber];
   // if key pressed is BACKSPACE and current input box is empty, return immediately
@@ -478,7 +478,7 @@ const updateOutput = function (currentInput, event) {
     displayInLaTeX = displayInLaTeXDefault;
     convertToLaTeX = converToLaTexDefault;
   }
-};
+}
 // listen for keyboard events in the input box and update result display in output box
 mathField.addEventListener("keyup", (event) => {
   // if key pressed is ENTER, UP Arrow, DOWN Arrow, return immediately
@@ -541,17 +541,17 @@ mathField.addEventListener("keydown", (event) => {
 
 // evaluate all input boxes
 // eslint-disable-next-line no-unused-vars
-const evaluateAll = function () {
+function evaluateAll() {
   for (let i = 0; i < inputNumber; i++) {
     const input = document.getElementById(composeId("input", i));
     updateOutput(input);
   }
-};
+}
 
 // Unused functions
 
 // eslint-disable-next-line no-unused-vars
-const deleteVars = function () {
+function deleteVars() {
   const vars = nerdamer.getVars();
   const tempVars = {};
   Object.keys(vars).forEach((varName) => {
@@ -560,11 +560,11 @@ const deleteVars = function () {
   });
   nerdamer.clearVars();
   return tempVars;
-};
+}
 
 // find matching parenthesis within a given string from the start index
 // eslint-disable-next-line no-unused-vars
-const findMatchingParen = function (string, start) {
+function findMatchingParen(string, start) {
   const stack = [];
   for (let i = start; i < string.length; i++) {
     const current = string.charAt(i);
@@ -578,4 +578,4 @@ const findMatchingParen = function (string, start) {
     }
   }
   return -1;
-};
+}

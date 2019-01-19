@@ -5,25 +5,25 @@
   const popupBtnIds = ["createFormulaBtn", "settingBtn"];
   const settingWindow = document.querySelector("#settingWindow");
 
-  const removeOldMessage = function () {
+  function removeOldMessage() {
     const oldMsg = document.querySelector("div.modal span.message");
     if (oldMsg !== null) {
       oldMsg.remove(); // remove old message
     }
-  };
+  }
 
-  const showMessage = function (message, place) {
+  function showMessage(message, place) {
     removeOldMessage();
     const msg = document.createElement("span");
     msg.style.paddingLeft = "10px";
     msg.className = "message";
     msg.innerHTML = message;
     place.parentNode.insertBefore(msg, place.nextSibling);
-  };
+  }
 
-  const closeWindow = function (modal) { // hide the popup window
+  function closeWindow(modal) { // hide the popup window
     modal.style.display = "none";
-  };
+  }
 
   /** *****************************Start of Setting Window**************************** */
   const constants = [];
@@ -31,14 +31,14 @@
   const VALUE = 1;
   const constantTable = settingWindow.querySelector("div#setConstants table");
 
-  const clearConstantTable = function () {
+  function clearConstantTable() {
     for (let i = 1; i < constantTable.rows.length; i++) { // skip the first th
       constantTable.rows[i][NAME] = "";
       constantTable.rows[i][VALUE] = "";
     }
-  };
+  }
 
-  const setConstant = function (name, value) {
+  function setConstant(name, value) {
     // console.log("​setConstant -> name", name);
     // console.log("​setConstant -> value", value);
     try {
@@ -49,9 +49,9 @@
     }
     console.log("constant is valid!");
     return true; // valid inputs
-  };
+  }
 
-  const setConstants = function () {
+  function setConstants() {
     let isValid = true;
     for (let i = 1; i < constantTable.rows.length; i++) { // skip the first th
       const row = constantTable.rows[i];
@@ -73,9 +73,9 @@
       }
     }
     return isValid;
-  };
+  }
 
-  const setCopyOnDblClick = function (input) {
+  function setCopyOnDblClick(input) {
     if (input.checked) {
       if (input.value === "yes") {
         copyOnDoubleClick = true;
@@ -84,8 +84,8 @@
       }
     }
     return true; // all selections are valid
-  };
-  const setPrecision = function (newPrecision, input) {
+  }
+  function setPrecision(newPrecision, input) {
     let value = newPrecision;
     if (value === "") {
       showMessage("Please input a number", input);
@@ -103,9 +103,9 @@
       }
     }
     return false; // invalid value
-  };
+  }
 
-  const resetDefaultSettings = function () {
+  function resetDefaultSettings() {
     // display the default precision
     const precisionInput = settingWindow.querySelector("input[name=decimalPrecision]");
     precisionInput.value = precision;
@@ -121,7 +121,7 @@
       constantTable.rows[i].cells[NAME] = constants[i][NAME];
       constantTable.rows[i].cells[VALUE] = constants[i][VALUE];
     }
-  };
+  }
 
   // initialize default values for settings
   resetDefaultSettings();
@@ -162,11 +162,11 @@
   });
   /** *****************************End of Setting Window**************************** */
 
-  const resetDefaultFormulas = function () {
+  function resetDefaultFormulas() {
     // need implementation
-  };
+  }
 
-  const resetDefaults = function (popupId) {
+  function resetDefaults(popupId) {
     switch (popupId) {
       case "createFormulaWindow":
         resetDefaultFormulas();
@@ -178,7 +178,7 @@
       default:
         throw new Error(`popupId ${popupId} is not valid`);
     }
-  };
+  }
 
   for (let i = 0; i < popupIds.length; i++) {
     const popupId = popupIds[i];
