@@ -5,24 +5,74 @@
   const popupBtnIds = ["createFormulaBtn", "settingBtn"];
   const settingWindow = document.querySelector("#settingWindow");
 
-  function removeOldMessage() {
-    const oldMsg = document.querySelector("div.modal span.message");
-    if (oldMsg !== null) {
-      oldMsg.remove(); // remove old message
+  for (let i = 0; i < popupIds.length; i++) {
+    const popupId = popupIds[i];
+    const popupBtnId = popupBtnIds[i];
+    // Get the modal
+    const modal = document.getElementById(popupId);
+
+    // Get the button that opens the modal
+    const btn = document.getElementById(popupBtnId);
+
+    // Get the <span> element that closes the modal
+    const span = modal.querySelector(".close");
+
+    // When the user clicks the button, open the modal
+    btn.onclick = () => {
+      modal.style.display = "block";
+    };
+
+    // When the user clicks on <span> (x), close the modal
+    // eslint-disable-next-line no-loop-func
+    span.onclick = function () {
+      // reset the values in the inputs because changes not saved
+      console.log("resetting inputs to default values in popup windows!");
+      resetDefaults(popupId);
+      closeWindow(modal);
+    };
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+      if (event.target === modal) {
+        closeWindow(modal);
+      }
+    };
+  }
+
+  function resetDefaults(popupId) {
+    switch (popupId) {
+      case "createFormulaWindow":
+        resetDefaultFormulas();
+        break;
+      case "settingWindow":
+        console.log("settingWindow found!");
+        resetDefaultSettings();
+        break;
+      default:
+        throw new Error(`popupId ${popupId} is not valid`);
+    }
+  }
+  
+  function resetDefaultSettings() {
+    // display the default precision
+    const precisionInput = settingWindow.querySelector("input[name=decimalPrecision]");
+    precisionInput.value = precision;
+    // select the default copy on double click option
+    if (copyOnDoubleClick) {
+      settingWindow.querySelector("input#copyOnDblClickYes").checked = true;
+    } else {
+      settingWindow.querySelector("input#copyOnDblClickNo").checked = true;
+    }
+    // load stored constants
+    clearConstantTable();
+    for (let i = 0; i < constants.length; i++) {
+      constantTable.rows[i].cells[NAME] = constants[i][NAME];
+      constantTable.rows[i].cells[VALUE] = constants[i][VALUE];
     }
   }
 
-  function showMessage(message, place) {
-    removeOldMessage();
-    const msg = document.createElement("span");
-    msg.style.paddingLeft = "10px";
-    msg.className = "message";
-    msg.innerHTML = message;
-    place.parentNode.insertBefore(msg, place.nextSibling);
-  }
-
-  function closeWindow(modal) { // hide the popup window
-    modal.style.display = "none";
+  function resetDefaultFormulas() {
+    // need implementation
   }
 
   /** *****************************Start of Setting Window**************************** */
@@ -105,24 +155,6 @@
     return false; // invalid value
   }
 
-  function resetDefaultSettings() {
-    // display the default precision
-    const precisionInput = settingWindow.querySelector("input[name=decimalPrecision]");
-    precisionInput.value = precision;
-    // select the default copy on double click option
-    if (copyOnDoubleClick) {
-      settingWindow.querySelector("input#copyOnDblClickYes").checked = true;
-    } else {
-      settingWindow.querySelector("input#copyOnDblClickNo").checked = true;
-    }
-    // load stored constants
-    clearConstantTable();
-    for (let i = 0; i < constants.length; i++) {
-      constantTable.rows[i].cells[NAME] = constants[i][NAME];
-      constantTable.rows[i].cells[VALUE] = constants[i][VALUE];
-    }
-  }
-
   // initialize default values for settings
   resetDefaultSettings();
 
@@ -162,55 +194,23 @@
   });
   /** *****************************End of Setting Window**************************** */
 
-  function resetDefaultFormulas() {
-    // need implementation
-  }
-
-  function resetDefaults(popupId) {
-    switch (popupId) {
-      case "createFormulaWindow":
-        resetDefaultFormulas();
-        break;
-      case "settingWindow":
-        console.log("settingWindow found!");
-        resetDefaultSettings();
-        break;
-      default:
-        throw new Error(`popupId ${popupId} is not valid`);
+  function removeOldMessage() {
+    const oldMsg = document.querySelector("div.modal span.message");
+    if (oldMsg !== null) {
+      oldMsg.remove(); // remove old message
     }
   }
 
-  for (let i = 0; i < popupIds.length; i++) {
-    const popupId = popupIds[i];
-    const popupBtnId = popupBtnIds[i];
-    // Get the modal
-    const modal = document.getElementById(popupId);
+  function showMessage(message, place) {
+    removeOldMessage();
+    const msg = document.createElement("span");
+    msg.style.paddingLeft = "10px";
+    msg.className = "message";
+    msg.innerHTML = message;
+    place.parentNode.insertBefore(msg, place.nextSibling);
+  }
 
-    // Get the button that opens the modal
-    const btn = document.getElementById(popupBtnId);
-
-    // Get the <span> element that closes the modal
-    const span = modal.querySelector(".close");
-
-    // When the user clicks the button, open the modal
-    btn.onclick = () => {
-      modal.style.display = "block";
-    };
-
-    // When the user clicks on <span> (x), close the modal
-    // eslint-disable-next-line no-loop-func
-    span.onclick = function () {
-      // reset the values in the inputs because changes not saved
-      console.log("resetting inputs to default values in popup windows!");
-      resetDefaults(popupId);
-      closeWindow(modal);
-    };
-
-    // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function (event) {
-      if (event.target === modal) {
-        closeWindow(modal);
-      }
-    };
+  function closeWindow(modal) { // hide the popup window
+    modal.style.display = "none";
   }
 }
