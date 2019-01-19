@@ -136,28 +136,28 @@ function evalExpr(input) {
 
 function updateOutput(currentInput, event) {
   const currentInputNumber = getNumber(currentInput);
-  const output = mathField.querySelectorAll("span.output")[currentInputNumber];
+  const currentOutput = getOutput(currentInputNumber);
   // if key pressed is BACKSPACE and current input box is empty, return immediately
   if (event !== undefined && event.keyCode === 8 && currentInput.value === "") {
-    output.innerHTML = "";
+    currentOutput.innerHTML = "";
     return;
   }
-  if (mathField.querySelector(`span#output-${currentInputNumber}`) !== null) {
+  if (currentOutput !== null) {
     let result = evalExpr(currentInput);
     if (result instanceof Error) { // an error object
       console.log("error: ", result);
-      output.innerHTML = '<div id="errorIcon" class="material-icons" style="font-size: 40px; position: relative; top: 10px">warning</div>'; // warning symbol
-      const errorIcon = output.querySelector("div#errorIcon");
+      currentOutput.innerHTML = '<div id="errorIcon" class="material-icons" style="font-size: 40px; position: relative; top: 10px">warning</div>'; // warning symbol
+      const errorIcon = currentOutput.querySelector("div#errorIcon");
       errorIcon.className += " not-selectable"; // set error icon to be not selectable
-      output.addEventListener("mousemove", () => {
-        const errorMsg = output.querySelector("div.errorMsg");
+      currentOutput.addEventListener("mousemove", () => {
+        const errorMsg = currentOutput.querySelector("div.errorMsg");
         if (isHovered(errorIcon)) {
           // console.log("errorMsg is hovered");
           if (errorMsg === null) {
             const newErrorMsg = document.createElement("div");
             newErrorMsg.setAttribute("class", "errorMsg not-selectable");
             newErrorMsg.innerHTML = result.message;
-            output.appendChild(newErrorMsg);
+            currentOutput.appendChild(newErrorMsg);
           }
         } else if (errorMsg !== null) {
           errorMsg.remove();
@@ -181,14 +181,14 @@ function updateOutput(currentInput, event) {
       }
       result = convertToDecimals(result);
       console.log(`result: ${result}`);
-      output.innerHTML = ` = ${result}`;
-      console.log(output.innerHTML);
+      currentOutput.innerHTML = ` = ${result}`;
+      console.log(currentOutput.innerHTML);
       // console.log(output.getAttribute("id"));
       // beautify result display using MathQuill
       if (displayInLaTeX) {
         // mathquillify the output box and store the returned MQ API object in an array
-        const outputNumber = getNumber(output);
-        outputMQs[outputNumber] = MQ.StaticMath(output);
+        const outputNumber = getNumber(currentOutput);
+        outputMQs[outputNumber] = MQ.StaticMath(currentOutput);
       }
     }
     displayInLaTeX = displayInLaTeXDefault;
@@ -199,7 +199,6 @@ function updateOutput(currentInput, event) {
 mathField.addEventListener("keyup", (event) => {
   // if key pressed is ENTER, UP Arrow, DOWN Arrow, return immediately
   if (event.keyCode === 13 || event.keyCode === 38 || event.keyCode === 40) {
-    console.log(document.getElementById("output-0"));
     return;
   }
   const currentInput = event.target;
@@ -214,14 +213,14 @@ mathField.addEventListener("keydown", (event) => {
   } else if (event.keyCode === 38) { // UP arrow key is pressed
     event.preventDefault();
     if (inputNumber > 0) {
-      const previousInput = mathField.querySelector(`#input-${currentInputNumber - 1}`);
+      const previousInput = getInput(currentInputNumber - 1);
       previousInput.focus();
       moveCaretToEnd(previousInput);
     }
   } else if (event.keyCode === 40) { // DOWN arrow key is pressed
     event.preventDefault();
     if (currentInputNumber < inputNumber - 1) {
-      const nextInput = mathField.querySelector(`#input-${currentInputNumber + 1}`);
+      const nextInput = getInput(currentInputNumber + 1);
       nextInput.focus();
       moveCaretToEnd(nextInput);
     } else {
@@ -233,20 +232,20 @@ mathField.addEventListener("keydown", (event) => {
       event.preventDefault(); // prevent BACKSPACE from deleting previous inputs
       // remove current input box and associated output box
       currentInput.remove();
-      const currentOutput = mathField.querySelector(`#output-${currentInputNumber}`);
+      const currentOutput = getOutput(currentInputNumber);
       currentOutput.remove();
       if (currentInputNumber + 1 < inputNumber) {
-        const nextInput = mathField.querySelector(`#input-${currentInputNumber + 1}`);
+        const nextInput = getInput(currentInputNumber + 1);
         nextInput.focus();
       } else {
-        const previousInput = mathField.querySelector(`#input-${currentInputNumber - 1}`);
+        const previousInput = getInput(currentInputNumber - 1);
         previousInput.focus();
       }
       // reassign id for all subsequent input and output boxes
       for (let i = currentInputNumber + 1; i < inputNumber; i++) {
-        const input = mathField.querySelector(`#input-${i}`);
+        const input = getInput(i);
         input.setAttribute("id", `input-${i - 1}`);
-        const output = mathField.querySelector(`#output-${i}`);
+        const output = getOutput(i);
         output.setAttribute("id", `output-${i - 1}`);
       }
       // decrement total input number
@@ -334,6 +333,14 @@ function createNewOutput() {
  */
 function getNumber(element) {
   return Number(element.id.substring(element.id.lastIndexOf("-") + 1));
+}
+
+function getOutput(index) {
+  return document.getElementById(composeId("output", index));
+}
+
+function getInput(index) {
+  return document.getElementById(composeId("input", index));
 }
 
 /**
