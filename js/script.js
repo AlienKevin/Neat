@@ -25,130 +25,8 @@ let displayInLaTeX = displayInLaTeXDefault;
 // eslint-disable-next-line prefer-const
 let copyOnDoubleClick = false;
 
-// create a new input box
-function createNewInput() {
-  const newInput = document.createElement("input");
-  newInput.setAttribute("type", "text");
-  newInput.setAttribute("size", "30");
-  newInput.setAttribute("spellcheck", false);
-  newInput.setAttribute("class", "input");
-  newInput.setAttribute("id", `input-${inputNumber}`);
-  return newInput;
-}
-// create a new output box
-function createNewOutput() {
-  const newOutput = document.createElement("span");
-  newOutput.setAttribute("class", "output");
-  newOutput.setAttribute("id", `output-${inputNumber}`);
-  return newOutput;
-}
-/**
- * Return the sequence number of an input or output box
- */
-function getNumber(element) {
-  return Number(element.id.substring(element.id.lastIndexOf("-") + 1));
-}
-
-/**
- *
- * @param {String} type "output"/"input"
- * @param {Number|String} number the sequence number
- */
-function composeId(type, number) {
-  return `${type}-${number}`;
-}
-
-// create a new field with an input box and output box
-function createNewField() {
-  const newInput = createNewInput();
-  const newOutput = createNewOutput();
-  mathField.appendChild(newInput);
-  mathField.appendChild(newOutput);
-  newInput.focus();
-  inputNumber++;
-}
-// move caret to the end of input string
-function moveCaretToEnd(input) {
-  input.setSelectionRange(input.value.length, input.value.length);
-}
-
 // create initial input and output on page load
 document.addEventListener("DOMContentLoaded", () => createNewField());
-
-// Source: https://stackoverflow.com/a/41391872/6798201
-// Wrap wrapper around nodes
-// Just pass a collection of nodes, and a wrapper element
-function wrapAll(nodes, wrapper) {
-  // Cache the current parent and previous sibling of the first node.
-  const parent = nodes[0].parentNode;
-  const previousSibling = nodes[0].previousSibling;
-
-  // Place each node in wrapper.
-  //  - If nodes is an array, we must increment the index we grab from
-  //    after each loop.
-  //  - If nodes is a NodeList, each node is automatically removed from
-  //    the NodeList when it is removed from its parent with appendChild.
-  for (let i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
-    wrapper.appendChild(nodes[i]);
-  }
-
-  // Place the wrapper just after the cached previousSibling,
-  // or if that is null, just before the first child.
-  const nextSibling = previousSibling ? previousSibling.nextSibling : parent.firstChild;
-  parent.insertBefore(wrapper, nextSibling);
-
-  return wrapper;
-}
-
-// Unwrap a wrapper by replacing it with its child nodes
-function unwrap(wrapper) {
-  // console.log("​unwrap -> wrapper.parent", wrapper.parentNode);
-  while (wrapper.childElementCount > 0) {
-    // console.log("​unwrap -> wrapper.childElementCount", wrapper.childElementCount);
-    // console.log("​unwrap -> wrapper", wrapper);
-    // console.log("​unwrap -> wrapper.childNodes[i]", wrapper.firstChild);
-    wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
-  }
-  wrapper.remove();
-}
-
-/**
- * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
- * Select a string, if user click copy (like on mobile devices) or
- * press keyboard to copy (like ctrl-c for windows), set the clipboard content
- * to the given string
- * @param {String} str the string to select
- */
-function selectString(str) {
-  let el = document.getElementById("copyBoard");
-  if (!el) {
-    // Create new element
-    el = document.createElement('textarea');
-    el.id = "copyBoard";
-    // Set non-editable to avoid focus and move outside of view
-    el.setAttribute('readonly', '');
-    el.style.cssText = "position: absolute; left: -9999px";
-    document.body.appendChild(el);
-  }
-  // Set value (string to be copied)
-  el.value = str;
-  // Select text inside element
-  el.select();
-  return el;
-}
-
-/**
- * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
- * Copying strings to the clipboard using pure Javascript
- * @param {String} str the string to copy to clipboard
- */
-function copyStringToClipboard(str) {
-  const el = selectString(str);
-  // Copy text to clipboard
-  document.execCommand('copy');
-  // Remove temporary element
-  el.remove();
-}
 
 // listen for double click on output boxes to copy the content in them
 mathField.addEventListener("dblclick", (event) => {
@@ -196,163 +74,6 @@ document.addEventListener("click", () => {
     }
   }
 });
-
-// Error class for reporting calculation errors
-class Error {
-  constructor(message) {
-    this.message = message;
-  }
-}
-function removeDuplicatedResults(result) {
-  console.log("removing duplicated results");
-  if (result instanceof Array) {
-    for (let i = 0; i < result.length; i++) {
-      const element = result[i];
-      for (let j = 0; j < i; j++) {
-        if (element.valueOf() === result[j].valueOf()) {
-          result.splice(i, 1);
-          i--;
-        }
-      }
-    }
-  }
-}
-function removeImagineryElements(symbol, result, index) {
-  console.log("symbol: ", symbol);
-  const elements = symbol.elements;
-  if (elements !== undefined) {
-    // remove imaginery results
-    console.log(`elements: ${elements}`);
-    console.log(`elements.length: ${elements.length}`);
-    for (let i = 0; i < elements.length; i++) {
-      console.log(`element.value: ${elements[i].value}`);
-      if (elements[i] !== undefined && elements[i].value.indexOf("i") >= 0) {
-        console.log(`imaginery element ${elements[i]}`);
-        elements.splice(i, 1);
-        i--;
-      }
-    }
-  } else if (symbol.value !== undefined) {
-    if (symbol.value.indexOf === undefined) { // values like Infinity
-      // do nothing
-    } else if (symbol.value.indexOf("i") >= 0) {
-      console.log("i found!");
-      if (result instanceof Array) { // prevent deleting result containing function names like "sin"
-        console.log("result is trimmed!");
-        result.splice(index, 1);
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function removeImagineryResults(result) {
-  if (result instanceof Array) { // result is an array of Symbols
-    for (let i = 0; i < result.length; i++) {
-      console.log(`i: ${i}`);
-      console.log(`result: ${result}`);
-      const elementDeleted = removeImagineryElements(result[i], result, i);
-      if (elementDeleted) {
-        i--;
-      }
-    }
-  } else if (result.symbol !== undefined) {
-    // result is an Expression object with Symbol object embedded
-    removeImagineryElements(result.symbol, result);
-  }
-}
-
-function evaluateSymbols(array) {
-  console.log(`result.length: ${array.length}`);
-  for (let i = 0; i < array.length; i++) {
-    array[i] = nerdamer(array[i]).evaluate().symbol;
-    console.log(`resul[${i}]: ${array[i]}`);
-  }
-  console.log("results: ", array);
-}
-
-function formatArrayResults(result) {
-  let displayed = "{";
-  for (let i = 0; i < result.length; i++) {
-    displayed += `${result[i][0]} = ${result[i][1]}`;
-    if (i < result.length - 1) {
-      displayed += ",";
-    }
-  }
-  displayed += "}";
-  console.log(`displayed: ${displayed}`);
-  return displayed;
-}
-
-// handle solveEquations command
-function handleSolveEquations(expr) {
-  const equalsIndex = expr.indexOf("=");
-  const doubleEqualsIndex = expr.indexOf("==");
-  if (equalsIndex >= 0 && doubleEqualsIndex === -1) { // only matching single equal sign
-    console.log("solveEquations found!");
-    let paramList = [];
-    const openBraceIndex = expr.indexOf("{");
-    if (openBraceIndex >= 0) { // system of equations
-      console.log("system of equations found!");
-      const closeBraceIndex = expr.indexOf("}");
-      const params = expr.substring(openBraceIndex + 1, closeBraceIndex);
-      paramList[0] = params.split(",");
-      console.log(`paramList[0]: ${paramList[0]}`
-        instanceof Array);
-    } else { // single equation
-      const params = expr;
-      paramList = params.split(","); // split into expression and variable to solve for
-      if (paramList.length === 1) { // the variable to solve for is not defined
-        // pick the first variable parsed by nerdamer automatically
-        paramList[1] = nerdamer(params).variables()[0];
-      }
-    }
-    console.log(`paramList[0]: ${paramList[0]}`);
-    console.log(`paramList[1]: ${paramList[1]}`);
-    let result;
-    try {
-      if (paramList[1] !== undefined) {
-        result = nerdamer.solveEquations(paramList[0], paramList[1]);
-        evaluateSymbols(result);
-        console.log(`result: ${result}`);
-      } else {
-        result = nerdamer.solveEquations(paramList[0]);
-        evaluateSymbols(result);
-        result = formatArrayResults(result);
-      }
-    } catch (e) { // handle error like attempting to solve non-linear system of equations
-      // console.log("error object: ", e);
-      // console.log("error object as string: " + e.toString());
-      result = new Error(e.message);
-    }
-    displayInLaTeX = false;
-    convertToLaTeX = false;
-    return result;
-  }
-  return false;
-}
-
-function convertToDecimals(result) {
-  if (result instanceof Array) { // an array result
-    console.log("converting an array result to decimals");
-    for (let i = 0; i < result.length; i++) {
-      if (result[i] instanceof Array) {
-        for (let j = 0; j < result[i].length; j++) {
-          result[i][j] = nerdamer(result[i][j], undefined, "numer").text("decimals");
-        }
-      } else {
-        result[i] = nerdamer(result[i], undefined, "numer").text("decimals");
-      }
-    }
-    return result;
-  }
-  if (typeof result === "object" && "text" in result) { // an expression result
-    return result.text("decimals");
-  } // a string result
-  console.log("converting a string result to decimals");
-  return result;
-}
 
 // evaluate expression inside an input box
 function evalExpr(input) {
@@ -411,11 +132,6 @@ function evalExpr(input) {
   console.log(`result: ${result}`);
 
   return result;
-}
-
-// check if an element is hovered
-function isHovered(element) {
-  return element.matches(":hover");
 }
 
 function updateOutput(currentInput, event) {
@@ -539,6 +255,54 @@ mathField.addEventListener("keydown", (event) => {
   }
 });
 
+// handle solveEquations command
+function handleSolveEquations(expr) {
+  const equalsIndex = expr.indexOf("=");
+  const doubleEqualsIndex = expr.indexOf("==");
+  if (equalsIndex >= 0 && doubleEqualsIndex === -1) { // only matching single equal sign
+    console.log("solveEquations found!");
+    let paramList = [];
+    const openBraceIndex = expr.indexOf("{");
+    if (openBraceIndex >= 0) { // system of equations
+      console.log("system of equations found!");
+      const closeBraceIndex = expr.indexOf("}");
+      const params = expr.substring(openBraceIndex + 1, closeBraceIndex);
+      paramList[0] = params.split(",");
+      console.log(`paramList[0]: ${paramList[0]}`
+        instanceof Array);
+    } else { // single equation
+      const params = expr;
+      paramList = params.split(","); // split into expression and variable to solve for
+      if (paramList.length === 1) { // the variable to solve for is not defined
+        // pick the first variable parsed by nerdamer automatically
+        paramList[1] = nerdamer(params).variables()[0];
+      }
+    }
+    console.log(`paramList[0]: ${paramList[0]}`);
+    console.log(`paramList[1]: ${paramList[1]}`);
+    let result;
+    try {
+      if (paramList[1] !== undefined) {
+        result = nerdamer.solveEquations(paramList[0], paramList[1]);
+        evaluateSymbols(result);
+        console.log(`result: ${result}`);
+      } else {
+        result = nerdamer.solveEquations(paramList[0]);
+        evaluateSymbols(result);
+        result = formatArrayResults(result);
+      }
+    } catch (e) { // handle error like attempting to solve non-linear system of equations
+      // console.log("error object: ", e);
+      // console.log("error object as string: " + e.toString());
+      result = new Error(e.message);
+    }
+    displayInLaTeX = false;
+    convertToLaTeX = false;
+    return result;
+  }
+  return false;
+}
+
 // evaluate all input boxes
 // eslint-disable-next-line no-unused-vars
 function evaluateAll() {
@@ -546,6 +310,242 @@ function evaluateAll() {
     const input = document.getElementById(composeId("input", i));
     updateOutput(input);
   }
+}
+
+// create a new input box
+function createNewInput() {
+  const newInput = document.createElement("input");
+  newInput.setAttribute("type", "text");
+  newInput.setAttribute("size", "30");
+  newInput.setAttribute("spellcheck", false);
+  newInput.setAttribute("class", "input");
+  newInput.setAttribute("id", `input-${inputNumber}`);
+  return newInput;
+}
+// create a new output box
+function createNewOutput() {
+  const newOutput = document.createElement("span");
+  newOutput.setAttribute("class", "output");
+  newOutput.setAttribute("id", `output-${inputNumber}`);
+  return newOutput;
+}
+/**
+ * Return the sequence number of an input or output box
+ */
+function getNumber(element) {
+  return Number(element.id.substring(element.id.lastIndexOf("-") + 1));
+}
+
+/**
+ *
+ * @param {String} type "output"/"input"
+ * @param {Number|String} number the sequence number
+ */
+function composeId(type, number) {
+  return `${type}-${number}`;
+}
+
+// create a new field with an input box and output box
+function createNewField() {
+  const newInput = createNewInput();
+  const newOutput = createNewOutput();
+  mathField.appendChild(newInput);
+  mathField.appendChild(newOutput);
+  newInput.focus();
+  inputNumber++;
+}
+// move caret to the end of input string
+function moveCaretToEnd(input) {
+  input.setSelectionRange(input.value.length, input.value.length);
+}
+
+// Error class for reporting calculation errors
+class Error {
+  constructor(message) {
+    this.message = message;
+  }
+}
+function removeDuplicatedResults(result) {
+  console.log("removing duplicated results");
+  if (result instanceof Array) {
+    for (let i = 0; i < result.length; i++) {
+      const element = result[i];
+      for (let j = 0; j < i; j++) {
+        if (element.valueOf() === result[j].valueOf()) {
+          result.splice(i, 1);
+          i--;
+        }
+      }
+    }
+  }
+}
+function removeImagineryElements(symbol, result, index) {
+  console.log("symbol: ", symbol);
+  const elements = symbol.elements;
+  if (elements !== undefined) {
+    // remove imaginery results
+    console.log(`elements: ${elements}`);
+    console.log(`elements.length: ${elements.length}`);
+    for (let i = 0; i < elements.length; i++) {
+      console.log(`element.value: ${elements[i].value}`);
+      if (elements[i] !== undefined && elements[i].value.indexOf("i") >= 0) {
+        console.log(`imaginery element ${elements[i]}`);
+        elements.splice(i, 1);
+        i--;
+      }
+    }
+  } else if (symbol.value !== undefined) {
+    if (symbol.value.indexOf === undefined) { // values like Infinity
+      // do nothing
+    } else if (symbol.value.indexOf("i") >= 0) {
+      console.log("i found!");
+      if (result instanceof Array) { // prevent deleting result containing function names like "sin"
+        console.log("result is trimmed!");
+        result.splice(index, 1);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function removeImagineryResults(result) {
+  if (result instanceof Array) { // result is an array of Symbols
+    for (let i = 0; i < result.length; i++) {
+      console.log(`i: ${i}`);
+      console.log(`result: ${result}`);
+      const elementDeleted = removeImagineryElements(result[i], result, i);
+      if (elementDeleted) {
+        i--;
+      }
+    }
+  } else if (result.symbol !== undefined) {
+    // result is an Expression object with Symbol object embedded
+    removeImagineryElements(result.symbol, result);
+  }
+}
+
+function evaluateSymbols(array) {
+  console.log(`result.length: ${array.length}`);
+  for (let i = 0; i < array.length; i++) {
+    array[i] = nerdamer(array[i]).evaluate().symbol;
+    console.log(`resul[${i}]: ${array[i]}`);
+  }
+  console.log("results: ", array);
+}
+
+function formatArrayResults(result) {
+  let displayed = "{";
+  for (let i = 0; i < result.length; i++) {
+    displayed += `${result[i][0]} = ${result[i][1]}`;
+    if (i < result.length - 1) {
+      displayed += ",";
+    }
+  }
+  displayed += "}";
+  console.log(`displayed: ${displayed}`);
+  return displayed;
+}
+
+function convertToDecimals(result) {
+  if (result instanceof Array) { // an array result
+    console.log("converting an array result to decimals");
+    for (let i = 0; i < result.length; i++) {
+      if (result[i] instanceof Array) {
+        for (let j = 0; j < result[i].length; j++) {
+          result[i][j] = nerdamer(result[i][j], undefined, "numer").text("decimals");
+        }
+      } else {
+        result[i] = nerdamer(result[i], undefined, "numer").text("decimals");
+      }
+    }
+    return result;
+  }
+  if (typeof result === "object" && "text" in result) { // an expression result
+    return result.text("decimals");
+  } // a string result
+  console.log("converting a string result to decimals");
+  return result;
+}
+
+// Source: https://stackoverflow.com/a/41391872/6798201
+// Wrap wrapper around nodes
+// Just pass a collection of nodes, and a wrapper element
+function wrapAll(nodes, wrapper) {
+  // Cache the current parent and previous sibling of the first node.
+  const parent = nodes[0].parentNode;
+  const previousSibling = nodes[0].previousSibling;
+
+  // Place each node in wrapper.
+  //  - If nodes is an array, we must increment the index we grab from
+  //    after each loop.
+  //  - If nodes is a NodeList, each node is automatically removed from
+  //    the NodeList when it is removed from its parent with appendChild.
+  for (let i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
+    wrapper.appendChild(nodes[i]);
+  }
+
+  // Place the wrapper just after the cached previousSibling,
+  // or if that is null, just before the first child.
+  const nextSibling = previousSibling ? previousSibling.nextSibling : parent.firstChild;
+  parent.insertBefore(wrapper, nextSibling);
+
+  return wrapper;
+}
+
+// Unwrap a wrapper by replacing it with its child nodes
+function unwrap(wrapper) {
+  // console.log("​unwrap -> wrapper.parent", wrapper.parentNode);
+  while (wrapper.childElementCount > 0) {
+    // console.log("​unwrap -> wrapper.childElementCount", wrapper.childElementCount);
+    // console.log("​unwrap -> wrapper", wrapper);
+    // console.log("​unwrap -> wrapper.childNodes[i]", wrapper.firstChild);
+    wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
+  }
+  wrapper.remove();
+}
+
+/**
+ * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
+ * Select a string, if user click copy (like on mobile devices) or
+ * press keyboard to copy (like ctrl-c for windows), set the clipboard content
+ * to the given string
+ * @param {String} str the string to select
+ */
+function selectString(str) {
+  let el = document.getElementById("copyBoard");
+  if (!el) {
+    // Create new element
+    el = document.createElement('textarea');
+    el.id = "copyBoard";
+    // Set non-editable to avoid focus and move outside of view
+    el.setAttribute('readonly', '');
+    el.style.cssText = "position: absolute; left: -9999px";
+    document.body.appendChild(el);
+  }
+  // Set value (string to be copied)
+  el.value = str;
+  // Select text inside element
+  el.select();
+  return el;
+}
+
+/**
+ * Based on: https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
+ * Copying strings to the clipboard using pure Javascript
+ * @param {String} str the string to copy to clipboard
+ */
+function copyStringToClipboard(str) {
+  const el = selectString(str);
+  // Copy text to clipboard
+  document.execCommand('copy');
+  // Remove temporary element
+  el.remove();
+}
+
+// check if an element is hovered
+function isHovered(element) {
+  return element.matches(":hover");
 }
 
 // Unused functions
