@@ -366,12 +366,35 @@ class UnbalancedParenthesesError extends Error {
   }
 }
 
+function matchFunction(expr, name) {
+  const matches = [];
+  for (let start = 0; start < expr.length; start++) {
+    const nameEnd = start + name.length;
+    if (expr.substring(start, nameEnd) === name) {
+      // function name found!
+      const end = matchBalancedParentheses(expr, nameEnd);
+      matches.push([start, end]);
+      start = end;
+    }
+  }
+  return matches;
+}
+
 function matchBalancedParentheses(expr, start = 0) {
   if (start >= expr.length || start < 0) {
     throw new RangeError(`start index is out of range of 0 to $(expr.length - 1)`);
   }
   const stack = [];
-  for (let end = start; end < expr.length; end++) {
+  while (expr[start] !== "(") { // start from the first "("
+    // eslint-disable-next-line no-param-reassign
+    start++;
+  }
+  if (start >= expr.length) {
+    throw new Error(`Cannot find "(" in $(expr)`);
+  }
+  let end = start;
+  for (; end < expr.length; end++) {
+    console.log(stack.toString());
     if (end > start && stack.length === 0) {
       return end;
     }
@@ -386,7 +409,11 @@ function matchBalancedParentheses(expr, start = 0) {
       }
     }
   }
-  throw new UnbalancedParenthesesError(`Too many "(" in ${expr}`);
+  if (stack.length !== 0) {
+    throw new UnbalancedParenthesesError(`Too many "(" in ${expr}`);
+  } else {
+    return end;
+  }
 }
 
 function rootReplacer(str, args) {
