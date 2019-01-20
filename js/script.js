@@ -351,12 +351,42 @@ function importFromText(text) {
       case "root":
         replace = rootReplacer;
         break;
-      }
-      expr = iterativeReplace(expr, regex, replace);
-			console.log("​importFromText -> expr", expr);
+    }
+    expr = iterativeReplace(expr, regex, replace);
+    console.log("​importFromText -> expr", expr);
   });
   console.log("​importFromText -> expr", expr);
   return expr;
+}
+
+class UnbalancedParenthesesError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "UnbalancedParentheses";
+  }
+}
+
+function matchBalancedParentheses(expr, start = 0) {
+  if (start >= expr.length || start < 0) {
+    throw new RangeError(`start index is out of range of 0 to $(expr.length - 1)`);
+  }
+  const stack = [];
+  for (let end = start; end < expr.length; end++) {
+    if (end > start && stack.length === 0) {
+      return end;
+    }
+    const char = expr[end];
+    if (char === "(") {
+      stack.push(1);
+    } else if (char === ")") {
+      if (stack.length > 0) {
+        stack.pop();
+      } else {
+        throw new UnbalancedParenthesesError(`Unbalanced ")" at index ${end} in ${expr}`);
+      }
+    }
+  }
+  throw new UnbalancedParenthesesError(`Too many "(" in ${expr}`);
 }
 
 function rootReplacer(str, args) {
