@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => createNewField());
 
 // listen for double click on output boxes to copy the content in them
 mathField.addEventListener("dblclick", (event) => {
-  // console.log("output dblclicked!");
+  // // console.log("output dblclicked!");
   const target = event.target;
   const OFFSET = 1; // skip over the first "equal sign"
   for (let i = 0; i < inputNumber; i++) { // the number of outputs is equal to the number of inputs
@@ -80,7 +80,7 @@ document.addEventListener("click", () => {
 // evaluate expression inside an input box
 function evalExpr(input) {
   const expr = getValue(input);
-  console.log(`expr: ${expr}`);
+  // console.log(`expr: ${expr}`);
   let result = handleSolveEquations(expr);
   if (result === false) {
     // let result = nerdamer.convertToLaTeX(nerdamer(expr).evaluate().text()).toString();
@@ -89,10 +89,10 @@ function evalExpr(input) {
     try {
       result = nerdamer(expr, undefined, ["numer"]);
       if (result.symbol !== undefined && result.symbol.value === "#") {
-        console.log("result.symbol is valid");
+        // console.log("result.symbol is valid");
         const decimalResult = Number(result.evaluate().text("decimals"));
         if (Number.isFinite(decimalResult)) { // result is a valid number, not Infinity or NaN
-          console.log("result is a valid number");
+          // console.log("result is a valid number");
           const exponentialResult = decimalResult.toExponential(precision);
           const significantFigures = decimalResult.toExponential().indexOf("e");
           const resultLength = decimalResult.toString().length;
@@ -103,11 +103,11 @@ function evalExpr(input) {
             if (Number(exponentMagnitude) > precision) {
               result = exponentialResult; // return the result in form of exponential
             } else {
-              console.log(`toFixed precision length: ${precision + (resultLength - significantFigures)}`);
+              // console.log(`toFixed precision length: ${precision + (resultLength - significantFigures)}`);
               result = decimalResult.toFixed(precision + (resultLength - significantFigures));
             }
           } else { // positive exponent
-            console.log("exponent of result is positive");
+            // console.log("exponent of result is positive");
             result = decimalResult.toFixed(precision);
           }
           // remove trailing zero
@@ -124,14 +124,14 @@ function evalExpr(input) {
   }
   removeImagineryResults(result);
   removeDuplicatedResults(result);
-  console.log(`result after removing imagineries: ${result}`);
+  // console.log(`result after removing imagineries: ${result}`);
   // convert fractions in result to decimals
   // result = result.text("decimal");
   // separate long result outputs into multiple lines
   if (result.length > 30) {
     result = result.replace(/,/g, ",<br>");
   }
-  console.log(`result: ${result}`);
+  // console.log(`result: ${result}`);
 
   return result;
 }
@@ -147,14 +147,14 @@ function updateOutput(currentInput, event) {
   if (currentOutput !== null) {
     let result = evalExpr(currentInput);
     if (result instanceof Error) { // an error object
-      console.log("error: ", result);
+      // console.log("error: ", result);
       currentOutput.innerHTML = '<div id="errorIcon" class="material-icons" style="font-size: 40px; position: relative; top: 10px">warning</div>'; // warning symbol
       const errorIcon = currentOutput.querySelector("div#errorIcon");
       errorIcon.className += " not-selectable"; // set error icon to be not selectable
       currentOutput.addEventListener("mousemove", () => {
         const errorMsg = currentOutput.querySelector("div.errorMsg");
         if (isHovered(errorIcon)) {
-          // console.log("errorMsg is hovered");
+          // // console.log("errorMsg is hovered");
           if (errorMsg === null) {
             const newErrorMsg = document.createElement("div");
             newErrorMsg.setAttribute("class", "errorMsg not-selectable");
@@ -167,9 +167,9 @@ function updateOutput(currentInput, event) {
       });
     } else {
       if (/[a-zA-Z]/.test(result) && convertToLaTeX) {
-        console.log(`result: ${result}`);
-        console.log("converting to LaTeX");
-        // console.log(result.text());
+        // console.log(`result: ${result}`);
+        // console.log("converting to LaTeX");
+        // // console.log(result.text());
         if (result.toTeX !== undefined) { // result is a nerdamer expression
           result = result.toTeX("decimal"); // export LaTeX as decimals
         } // else then result is string values like "undefined"
@@ -179,13 +179,13 @@ function updateOutput(currentInput, event) {
         result = result.replace(/asec/g, "arcsec");
         result = result.replace(/acsc/g, "arccsc");
         result = result.replace(/acot/g, "arccot");
-        console.log(`result: ${result}`);
+        // console.log(`result: ${result}`);
       }
       result = convertToDecimals(result);
-      console.log(`result: ${result}`);
+      // console.log(`result: ${result}`);
       currentOutput.innerHTML = ` = ${result}`;
-      console.log(currentOutput.innerHTML);
-      // console.log(output.getAttribute("id"));
+      // console.log(currentOutput.innerHTML);
+      // // console.log(output.getAttribute("id"));
       // beautify result display using MathQuill
       if (displayInLaTeX) {
         // mathquillify the output box and store the returned MQ API object in an array
@@ -261,16 +261,15 @@ function handleSolveEquations(expr) {
   const equalsIndex = expr.indexOf("=");
   const doubleEqualsIndex = expr.indexOf("==");
   if (equalsIndex >= 0 && doubleEqualsIndex === -1) { // only matching single equal sign
-    console.log("solveEquations found!");
+    // console.log("solveEquations found!");
     let paramList = [];
     const openBraceIndex = expr.indexOf("{");
     if (openBraceIndex >= 0) { // system of equations
-      console.log("system of equations found!");
+      // console.log("system of equations found!");
       const closeBraceIndex = expr.indexOf("}");
       const params = expr.substring(openBraceIndex + 1, closeBraceIndex);
       paramList[0] = params.split(",");
-      console.log(`paramList[0]: ${paramList[0]}`
-        instanceof Array);
+      // console.log(`paramList[0]: ${paramList[0]}` instanceof Array);
     } else { // single equation
       const params = expr;
       paramList = params.split(","); // split into expression and variable to solve for
@@ -279,22 +278,22 @@ function handleSolveEquations(expr) {
         paramList[1] = nerdamer(params).variables()[0];
       }
     }
-    console.log(`paramList[0]: ${paramList[0]}`);
-    console.log(`paramList[1]: ${paramList[1]}`);
+    // console.log(`paramList[0]: ${paramList[0]}`);
+    // console.log(`paramList[1]: ${paramList[1]}`);
     let result;
     try {
       if (paramList[1] !== undefined) {
         result = nerdamer.solveEquations(paramList[0], paramList[1]);
         evaluateSymbols(result);
-        console.log(`result: ${result}`);
+        // console.log(`result: ${result}`);
       } else {
         result = nerdamer.solveEquations(paramList[0]);
         evaluateSymbols(result);
         result = formatArrayResults(result);
       }
     } catch (e) { // handle error like attempting to solve non-linear system of equations
-      // console.log("error object: ", e);
-      // console.log("error object as string: " + e.toString());
+      // // console.log("error object: ", e);
+      // // console.log("error object as string: " + e.toString());
       result = new Error(e.message);
     }
     displayInLaTeX = false;
@@ -323,8 +322,62 @@ function getGuppy(input) {
   return guppies[getNumber(input)];
 }
 
-function importFromText(text){
+function importFromText(text) {
   console.log("​importFromText -> text", text);
+  let expr = text;
+  const funcNameMap = {
+    neg: "-",
+    absolutevalue: "abs",
+    squareroot: "sqrt",
+    root: undefined,
+    derivative: "diff",
+    integral: "integrate",
+  };
+  Object.keys(funcNameMap).forEach((textFuncName) => {
+    const regex = new RegExp(`${textFuncName}\\((.+)\\)`, "g");
+    console.log(expr.match(regex));
+    const newFuncName = funcNameMap[textFuncName];
+    let replace;
+    // eslint-disable-next-line default-case
+    switch (textFuncName) {
+      case "neg":
+      case "absolutevalue":
+      case "squareroot":
+      case "derivative":
+      case "integral":
+        // eslint-disable-next-line prefer-template
+        replace = newFuncName + "($1)";
+        break;
+      case "root":
+        replace = rootReplacer;
+        break;
+      }
+      expr = iterativeReplace(expr, regex, replace);
+			console.log("​importFromText -> expr", expr);
+  });
+  console.log("​importFromText -> expr", expr);
+  return expr;
+}
+
+function rootReplacer(str, args) {
+  const argList = args.replace(/\s/g, "").split(",");
+  const base = argList[1];
+  const power = `(1/${argList[0]})`;
+  return `(${base}^${power})`;
+}
+
+function iterativeReplace(expr, regex, replacer) {
+  let newExpr = expr;
+  let oldExpr = "";
+  if (oldExpr === newExpr) {
+    // a random default value that is different from expr
+    oldExpr = "?";
+  }
+  while (oldExpr !== newExpr) {
+    oldExpr = newExpr;
+    newExpr = newExpr.replace(regex, replacer);
+  }
+  return newExpr;
 }
 
 // create a new input box
@@ -388,8 +441,9 @@ class Error {
     this.message = message;
   }
 }
+
 function removeDuplicatedResults(result) {
-  console.log("removing duplicated results");
+  // console.log("removing duplicated results");
   if (result instanceof Array) {
     for (let i = 0; i < result.length; i++) {
       const element = result[i];
@@ -402,17 +456,18 @@ function removeDuplicatedResults(result) {
     }
   }
 }
+
 function removeImagineryElements(symbol, result, index) {
-  console.log("symbol: ", symbol);
+  // console.log("symbol: ", symbol);
   const elements = symbol.elements;
   if (elements !== undefined) {
     // remove imaginery results
-    console.log(`elements: ${elements}`);
-    console.log(`elements.length: ${elements.length}`);
+    // console.log(`elements: ${elements}`);
+    // console.log(`elements.length: ${elements.length}`);
     for (let i = 0; i < elements.length; i++) {
-      console.log(`element.value: ${elements[i].value}`);
+      // console.log(`element.value: ${elements[i].value}`);
       if (elements[i] !== undefined && elements[i].value.indexOf("i") >= 0) {
-        console.log(`imaginery element ${elements[i]}`);
+        // console.log(`imaginery element ${elements[i]}`);
         elements.splice(i, 1);
         i--;
       }
@@ -421,9 +476,9 @@ function removeImagineryElements(symbol, result, index) {
     if (symbol.value.indexOf === undefined) { // values like Infinity
       // do nothing
     } else if (symbol.value.indexOf("i") >= 0) {
-      console.log("i found!");
+      // console.log("i found!");
       if (result instanceof Array) { // prevent deleting result containing function names like "sin"
-        console.log("result is trimmed!");
+        // console.log("result is trimmed!");
         result.splice(index, 1);
         return true;
       }
@@ -435,8 +490,8 @@ function removeImagineryElements(symbol, result, index) {
 function removeImagineryResults(result) {
   if (result instanceof Array) { // result is an array of Symbols
     for (let i = 0; i < result.length; i++) {
-      console.log(`i: ${i}`);
-      console.log(`result: ${result}`);
+      // console.log(`i: ${i}`);
+      // console.log(`result: ${result}`);
       const elementDeleted = removeImagineryElements(result[i], result, i);
       if (elementDeleted) {
         i--;
@@ -449,12 +504,12 @@ function removeImagineryResults(result) {
 }
 
 function evaluateSymbols(array) {
-  console.log(`result.length: ${array.length}`);
+  // console.log(`result.length: ${array.length}`);
   for (let i = 0; i < array.length; i++) {
     array[i] = nerdamer(array[i]).evaluate().symbol;
-    console.log(`resul[${i}]: ${array[i]}`);
+    // console.log(`resul[${i}]: ${array[i]}`);
   }
-  console.log("results: ", array);
+  // console.log("results: ", array);
 }
 
 function formatArrayResults(result) {
@@ -466,13 +521,13 @@ function formatArrayResults(result) {
     }
   }
   displayed += "}";
-  console.log(`displayed: ${displayed}`);
+  // console.log(`displayed: ${displayed}`);
   return displayed;
 }
 
 function convertToDecimals(result) {
   if (result instanceof Array) { // an array result
-    console.log("converting an array result to decimals");
+    // console.log("converting an array result to decimals");
     for (let i = 0; i < result.length; i++) {
       if (result[i] instanceof Array) {
         for (let j = 0; j < result[i].length; j++) {
@@ -487,7 +542,7 @@ function convertToDecimals(result) {
   if (typeof result === "object" && "text" in result) { // an expression result
     return result.text("decimals");
   } // a string result
-  console.log("converting a string result to decimals");
+  // console.log("converting a string result to decimals");
   return result;
 }
 
@@ -518,11 +573,11 @@ function wrapAll(nodes, wrapper) {
 
 // Unwrap a wrapper by replacing it with its child nodes
 function unwrap(wrapper) {
-  // console.log("​unwrap -> wrapper.parent", wrapper.parentNode);
+  // // console.log("​unwrap -> wrapper.parent", wrapper.parentNode);
   while (wrapper.childElementCount > 0) {
-    // console.log("​unwrap -> wrapper.childElementCount", wrapper.childElementCount);
-    // console.log("​unwrap -> wrapper", wrapper);
-    // console.log("​unwrap -> wrapper.childNodes[i]", wrapper.firstChild);
+    // // console.log("​unwrap -> wrapper.childElementCount", wrapper.childElementCount);
+    // // console.log("​unwrap -> wrapper", wrapper);
+    // // console.log("​unwrap -> wrapper.childNodes[i]", wrapper.firstChild);
     wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
   }
   wrapper.remove();
@@ -578,7 +633,7 @@ function deleteVars() {
   const vars = nerdamer.getVars();
   const tempVars = {};
   Object.keys(vars).forEach((varName) => {
-    console.log(`var: ${varName}`);
+    // console.log(`var: ${varName}`);
     tempVars[varName] = vars[varName];
   });
   nerdamer.clearVars();
